@@ -11,6 +11,7 @@ type Props = {
     type?: string;
     placeholder?: string;
     options?: string[];
+    required?: boolean;
 };
 
 export default function InputField({
@@ -23,7 +24,8 @@ export default function InputField({
     onBlur,
     type = "text",
     placeholder,
-    options
+    options,
+    required
 }: Props) {
 
     const hasError = error && touched;
@@ -41,8 +43,9 @@ export default function InputField({
 
     return (
         <div className="space-y-1.5 flex flex-col items-start group">
-            <label className="text-[11px] font-bold tracking-wider text-gray-400 uppercase ml-1 transition-colors group-focus-within:text-indigo-600">
+            <label className="text-[11px] font-bold tracking-wider text-gray-400 uppercase ml-1 transition-colors group-focus-within:text-indigo-600 flex items-center gap-1">
                 {label}
+                {required && <span className="text-red-500">*</span>}
             </label>
 
             <div className="relative w-full">

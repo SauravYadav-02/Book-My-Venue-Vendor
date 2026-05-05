@@ -75,12 +75,13 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     // Check if vendor is already logged in and redirect them
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const vendorId = localStorage.getItem("vendorId");
         if (vendorId) {
-            navigate("/dashboard");
+            navigate("/dashboard", { replace: true });
         }
-    }, [navigate]);
+    }, []); // intentionally empty — only runs once on mount
 
     const [form, setForm] = useState<LoginForm>({
         username: "",
@@ -111,7 +112,12 @@ const LoginPage: React.FC = () => {
             if ("vendor" in data) {
                 localStorage.setItem("vendorId", data.vendor._id);
                 toast.success("Login Success 🚀");
-                setTimeout(() => navigate("/dashboard"), 1000);
+                // Use replace so the login page is removed from history
+                // Small delay to let the toast show
+                setTimeout(() => navigate("/dashboard", { replace: true }), 800);
+            } else {
+                toast.error("Invalid credentials");
+                setLoading(false);
             }
         } catch {
             toast.error("Login Failed ❌");

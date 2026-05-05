@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 // Layouts & Dashboard
 import Layout from "./components/layouts/Layout";
@@ -19,7 +19,16 @@ import EditVenue from "./pages/vendor/EditVenues/EditVenue";
 import Bookings from "./pages/vendor/Bookings";
 import CalendarPage from "./pages/vendor/CalendarPage";
 
+import { SubscriptionProvider } from "./context/SubscriptionContext";
+import SubscriptionDashboard from "./pages/vendor/SubscriptionDashboard";
+import PlansManagement from "./pages/admin/PlansManagement";
 
+// Wrapper to provide Subscription context to nested routes via Outlet
+const SubscriptionLayout = () => (
+  <SubscriptionProvider>
+    <Outlet />
+  </SubscriptionProvider>
+);
 
 export default function App() {
   return (
@@ -33,15 +42,24 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          {/* Vendor Dashboard */}
-          <Route path="/dashboard" element={<MainLayout />} />
+          {/* Wrap all protected routes with SubscriptionProvider so we can globally check access */}
+          <Route element={<SubscriptionLayout />}>
+            {/* Vendor Dashboard */}
+            <Route path="/dashboard" element={<MainLayout />} />
 
-          {/* Vendor Venue Management (Wrapped in Layout for Sidebar/Navbar) */}
-          <Route path="/venue" element={<Layout><VenueList /></Layout>} />
-          <Route path="/venue/add" element={<Layout><AddVenue /></Layout>} />
-          <Route path="/venue/edit/:id" element={<Layout><EditVenue /></Layout>} />
-          <Route path="/booking" element={<Layout><Bookings /></Layout>} />
-          <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
+            {/* Vendor Venue Management (Wrapped in Layout for Sidebar/Navbar) */}
+            <Route path="/venue" element={<Layout><VenueList /></Layout>} />
+            <Route path="/venue/add" element={<Layout><AddVenue /></Layout>} />
+            <Route path="/venue/edit/:id" element={<Layout><EditVenue /></Layout>} />
+            <Route path="/booking" element={<Layout><Bookings /></Layout>} />
+            <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
+
+            {/* Subscription & Billing */}
+            <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
+
+            {/* Admin Routes */}
+            <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />
+          </Route>
         </Route>
 
         {/* Fallback route */}

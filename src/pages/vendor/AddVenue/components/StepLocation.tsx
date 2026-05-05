@@ -13,23 +13,23 @@ function StepLocation({
 }) {
     return (
         <SectionCard title="Location">
-            <div className="grid grid-cols-1 gap-8">
-                <div>
+            <div className="form-flow">
+                <div className="field-stack">
                     <Label required>Street address</Label>
                     <InputField
                         id="address" value={form.address} placeholder="e.g. 789 Wedding Lane"
                         onChange={(v) => update("address", v)} error={errors.address}
                     />
                 </div>
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
+                <div className="form-grid">
+                    <div className="field-stack">
                         <Label required>City</Label>
                         <InputField
                             id="city" value={form.city} placeholder="e.g. Springfield"
                             onChange={(v) => update("city", v)} error={errors.city}
                         />
                     </div>
-                    <div>
+                    <div className="field-stack">
                         <Label required>State</Label>
                         <InputField
                             id="state" value={form.state} placeholder="e.g. Illinois"
@@ -37,15 +37,15 @@ function StepLocation({
                         />
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
+                <div className="form-grid">
+                    <div className="field-stack">
                         <Label>ZIP code</Label>
                         <InputField
                             id="zip" value={form.zip} placeholder="e.g. 62701"
                             onChange={(v) => update("zip", v)}
                         />
                     </div>
-                    <div>
+                    <div className="field-stack">
                         <Label>Country</Label>
                         <SelectField
                             id="country" value={form.country}
@@ -54,11 +54,11 @@ function StepLocation({
                         />
                     </div>
                 </div>
-                <div>
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-2">
+                <div className="field-stack">
+                    <p className="form-label">
                         Coordinates <span className="normal-case font-normal">(optional)</span>
                     </p>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="form-grid">
                         <InputField
                             id="lat" type="number" value={form.lat} placeholder="Latitude e.g. 39.7817"
                             step="any" onChange={(v) => update("lat", v)}

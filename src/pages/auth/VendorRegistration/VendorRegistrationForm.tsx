@@ -24,16 +24,16 @@ const INIT: FormValues = {
 };
 
 const FIELDS: Field[] = [
-    { id: "fullName", label: "Full Name", icon: User, section: "personal" },
-    { id: "email", label: "Email Address", icon: Mail, section: "personal", type: "email" },
-    { id: "phone", label: "Phone Number", icon: Phone, section: "personal", type: "tel" },
+    { id: "fullName", label: "Full Name", icon: User, section: "personal", required: true },
+    { id: "email", label: "Email Address", icon: Mail, section: "personal", type: "email", required: true },
+    { id: "phone", label: "Phone Number", icon: Phone, section: "personal", type: "tel", required: true },
 
-    { id: "businessName", label: "Business Name", icon: Building2, section: "business" },
-    { id: "businessType", label: "Business Type", icon: Building2, section: "business" },
-    { id: "governmentId", label: "Government ID", icon: FileText, section: "business", type: "file" },
-    { id: "licenseDoc", label: "License Document", icon: FileText, section: "business", type: "file" },
-    { id: "address", label: "Full Address", icon: Building2, section: "business" },
-    { id: "pincode", label: "Pincode", icon: Building2, section: "business" },
+    { id: "businessName", label: "Business Name", icon: Building2, section: "business", required: true },
+    { id: "businessType", label: "Business Type", icon: Building2, section: "business", required: true },
+    { id: "governmentId", label: "Government ID", icon: FileText, section: "business", type: "file", required: true },
+    { id: "licenseDoc", label: "License Document", icon: FileText, section: "business", type: "file", required: true },
+    { id: "address", label: "Full Address", icon: Building2, section: "business", required: true },
+    { id: "pincode", label: "Pincode", icon: Building2, section: "business", required: true },
 
     {
         id: "state",
@@ -41,7 +41,8 @@ const FIELDS: Field[] = [
         icon: Building2,
         section: "business",
         type: "select",
-        options: INDIAN_STATES
+        options: INDIAN_STATES,
+        required: true
     },
 ];
 

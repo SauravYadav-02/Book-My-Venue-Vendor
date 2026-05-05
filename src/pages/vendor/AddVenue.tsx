@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type { FormErrors, VenueForm } from "./AddVenue/types/Interface";
 import { INITIAL_FORM, STEPS } from "./AddVenue/types/Constants";
 import StepBar from "./AddVenue/components/StepBar";
@@ -8,9 +9,20 @@ import StepLocation from "./AddVenue/components/StepLocation";
 import StepAmenities from "./AddVenue/components/StepAmenities";
 import StepReview from "./AddVenue/components/StepReview";
 import { createVenue } from "../../services/venueService";
-
+import { useSubscription } from "../../context/SubscriptionContext";
+import toastNotification from "react-hot-toast";
 
 export default function AddVenue() {
+  const navigate = useNavigate();
+  const { currentSubscription, loading: subLoading } = useSubscription();
+
+  useEffect(() => {
+    if (!subLoading && (!currentSubscription || currentSubscription.status === "expired")) {
+      toastNotification.error("You need an active subscription to add venues.");
+      navigate("/billing");
+    }
+  }, [currentSubscription, subLoading, navigate]);
+
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<VenueForm>({ ...INITIAL_FORM, amenities: new Set() });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -125,17 +137,17 @@ export default function AddVenue() {
   }
 
   return (
-    <div className="flex-1 bg-slate-50 py-4 px-4 sm:py-6 sm:px-6 relative font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900 flex justify-center">
+    <div className="flex-1 bg-slate-50 py-4 px-4 sm:py-6 sm:px-6 relative font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900 flex flex-col">
       {/* Subtle background decoration */}
       <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl max-h-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
 
-      <div className="w-full max-w-3xl bg-white rounded-[2rem] shadow-[0_20px_60px_rgba(15,_118,_110,_0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14 transition-all duration-300">
+      <div className="w-full bg-white rounded-2xl shadow-[0_20px_60px_rgba(15,_118,_110,_0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14 transition-all duration-300">
 
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Add new venue</h1>
-            <p className="text-base text-slate-500 mt-1.5 font-medium">Build your listing profile step by step.</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold sm:font-extrabold text-slate-900 tracking-tight">Add new venue</h1>
+            <p className="text-sm sm:text-base md:text-lg text-slate-500 mt-1.5 sm:mt-2 font-medium sm:font-semibold">Build your listing profile step by step.</p>
           </div>
           <div className="flex flex-col items-start sm:items-end">
             <span className="inline-flex items-center justify-center text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-4 py-1.5 font-bold shadow-sm whitespace-nowrap">
@@ -166,7 +178,7 @@ export default function AddVenue() {
           <button
             type="button"
             onClick={handleBack}
-            className={`group flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold border border-slate-200
+            className={`group flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm md:text-base font-bold border border-slate-200
               text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all ${step === 0 ? "invisible" : ""}`}
           >
             <svg className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +191,7 @@ export default function AddVenue() {
             type="button"
             onClick={handleNext}
             disabled={loading}
-            className={`group flex items-center gap-2 px-8 py-3 rounded-xl text-base font-bold
+            className={`group flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl text-sm sm:text-base md:text-lg font-bold
               bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white transition-all shadow-md hover:shadow-emerald-500/25 ${loading ? "opacity-60 cursor-not-allowed" : ""
               }`}
           >

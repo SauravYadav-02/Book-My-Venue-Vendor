@@ -1,6 +1,6 @@
 import { type Errors, type FormValues } from "../types/formTypes";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export function validate(v: FormValues): Errors {
     const e: Errors = {};
@@ -21,13 +21,13 @@ export function validate(v: FormValues): Errors {
     if (!v.governmentId) {
         e.governmentId = "Required";
     } else if (v.governmentId.size > MAX_FILE_SIZE) {
-        e.governmentId = "Image must be less than 5MB";
+        e.governmentId = "Image must be less than 15MB";
     }
 
     if (!v.licenseDoc) {
         e.licenseDoc = "Required";
     } else if (v.licenseDoc.size > MAX_FILE_SIZE) {
-        e.licenseDoc = "Image must be less than 5MB";
+        e.licenseDoc = "Image must be less than 15MB";
     }
 
     if (!v.address) e.address = "Required";

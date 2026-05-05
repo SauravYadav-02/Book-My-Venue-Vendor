@@ -150,10 +150,10 @@ export default function EditVenue() {
     }
 
     return (
-        <div className="flex-1 bg-slate-50 py-4 px-4 sm:py-6 sm:px-6 relative font-sans text-slate-800 flex justify-center">
+        <div className="flex-1 bg-slate-50 py-4 px-4 sm:py-6 sm:px-6 relative font-sans text-slate-800 flex flex-col">
             <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
 
-            <div className="w-full max-w-3xl bg-white rounded-[2rem] shadow-[0_20px_60px_rgba(15,118,110,0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14">
+            <div className="w-full bg-white rounded-2xl shadow-[0_20px_60px_rgba(15,118,110,0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14">
 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">

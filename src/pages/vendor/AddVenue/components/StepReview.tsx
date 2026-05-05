@@ -5,9 +5,9 @@ import { currencyFormatter } from "../../../../utils/currency";
 
 
 export const ReviewRow = ({ label, value }: { label: string; value: string }) => (
-    <div className="bg-slate-50/70 border border-slate-100 rounded-2xl p-4 transition-all hover:bg-white hover:shadow-sm">
-        <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400 font-bold mb-1">{label}</p>
-        <p className="text-[15px] text-slate-800 font-bold">{value || "—"}</p>
+    <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:bg-white hover:shadow-sm">
+        <p className="form-section-title mb-1">{label}</p>
+        <p className="text-base text-slate-800 font-bold break-words">{value || "-"}</p>
     </div>
 );
 
@@ -17,7 +17,7 @@ export default function StepReview({
     form: VenueForm; onAddMedia: (files: File[]) => void; onRemoveMedia?: (index: number) => void;
 }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const fmt = (n: string) => n ? currencyFormatter.format(parseInt(n)) : "—";
+    const fmt = (n: string) => n ? currencyFormatter.format(parseInt(n)) : "-";
     const MAX_IMAGES = 10;
     const remaining = MAX_IMAGES - form.mediaFiles.length;
 
@@ -55,7 +55,7 @@ export default function StepReview({
                 {remaining > 0 ? (
                     <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-200 rounded-3xl p-10 text-center cursor-pointer bg-slate-50/50
+                        className="cursor-pointer rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-[clamp(1.25rem,4vw,2.5rem)] text-center
               hover:border-emerald-400 hover:bg-emerald-50/50 transition-all group shadow-sm"
                     >
                         <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white shadow-sm border border-slate-100 group-hover:border-emerald-200 group-hover:bg-emerald-100
@@ -65,11 +65,11 @@ export default function StepReview({
                                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <p className="text-[15px] text-slate-600 group-hover:text-emerald-700 font-bold transition-colors">
+                        <p className="text-base text-slate-600 group-hover:text-emerald-700 font-bold transition-colors">
                             Click to upload photos
                         </p>
                         <p className="text-sm text-slate-400 mt-1 font-medium">
-                            JPG, PNG or WEBP · max 5MB each · {remaining} of {MAX_IMAGES} remaining
+                            JPG, PNG or WEBP · max 15MB each · {remaining} of {MAX_IMAGES} remaining
                         </p>
                     </div>
                 ) : (
@@ -80,9 +80,9 @@ export default function StepReview({
 
                 {/* Image previews with remove button */}
                 {form.mediaFiles.length > 0 && (
-                    <div className="flex flex-wrap gap-4 mt-4">
+                    <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-3 sm:flex sm:flex-wrap sm:gap-4">
                         {form.mediaFiles.map((file, i) => (
-                            <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-100 group shadow-sm hover:border-emerald-200 transition-colors">
+                            <div key={i} className="group relative aspect-square w-full max-w-28 overflow-hidden rounded-xl border-2 border-slate-100 shadow-sm transition-colors hover:border-emerald-200 sm:h-24 sm:w-24">
                                 <img src={getImageUrl(file)} alt={`upload-${i}`} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                                 {onRemoveMedia && (
                                     <button
@@ -119,4 +119,3 @@ export default function StepReview({
         </>
     );
 }
-

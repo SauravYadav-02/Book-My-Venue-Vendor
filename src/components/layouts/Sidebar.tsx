@@ -13,7 +13,10 @@ import {
     LogOut,
     Menu,
     X,
+    Package
 } from "lucide-react";
+import { useSubscription } from "../../context/SubscriptionContext";
+import toast from "react-hot-toast";
 
 // ─── Nav Config ───────────────────────────────────────────────────────────────
 const navItems = [
@@ -22,6 +25,7 @@ const navItems = [
     { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
     { label: "Calendar", path: "/calendar", icon: Calendar },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
+    { label: "Billing", path: "/billing", icon: Package },
     { label: "Settings", path: "/settings", icon: Settings },
 ];
 
@@ -105,6 +109,8 @@ const SidebarItem = ({
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 const Sidebar = () => {
     const navigate = useNavigate();
+    const { currentSubscription } = useSubscription();
+    
     const [active, setActive] = useState(() => {
         const path = window.location.pathname.slice(1).toLowerCase();
         const matched = navItems.find(item => item.label.toLowerCase() === path);
@@ -207,6 +213,16 @@ const Sidebar = () => {
                 <div className="mt-auto px-4 pb-6">
                     {/* Add New Listing */}
                     <button
+                        onClick={() => {
+                            if (!currentSubscription || currentSubscription.status === "expired") {
+                                toast.error("Please purchase a subscription plan to continue adding venues.");
+                                navigate("/billing");
+                                setActive("Billing");
+                            } else {
+                                navigate("/venue/add");
+                                setActive("Listings");
+                            }
+                        }}
                         className={`
                             w-full flex items-center gap-2 bg-primary hover:bg-primary-light
                             text-white rounded-xl font-medium shadow-sm hover:shadow-md

@@ -14,16 +14,16 @@ function StepBasicInfo({
     return (
         <>
             <SectionCard title="Basic info">
-                <div className="grid grid-cols-1 gap-8">
-                    <div>
+                <div className="form-flow">
+                    <div className="field-stack">
                         <Label required>Venue name</Label>
                         <InputField
                             id="name" value={form.name} placeholder="e.g. Grand Ballroom"
                             onChange={(v) => update("name", v)} error={errors.name}
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div>
+                    <div className="form-grid">
+                        <div className="field-stack">
                             <Label required>Venue type</Label>
                             <SelectField
                                 id="type" value={form.type}
@@ -31,7 +31,7 @@ function StepBasicInfo({
                                 onChange={(v) => update("type", v)} error={errors.type}
                             />
                         </div>
-                        <div>
+                        <div className="field-stack">
                             <Label required>Capacity (guests)</Label>
                             <InputField
                                 id="capacity" type="number" value={form.capacity} placeholder="e.g. 200"
@@ -39,7 +39,7 @@ function StepBasicInfo({
                             />
                         </div>
                     </div>
-                    <div>
+                    <div className="field-stack">
                         <Label required>Description</Label>
                         <TextareaField
                             id="description" value={form.description}
@@ -51,8 +51,8 @@ function StepBasicInfo({
             </SectionCard>
 
             <SectionCard title="Pricing">
-                <div className="grid grid-cols-1 gap-6">
-                    <div>
+                <div className="form-flow">
+                    <div className="field-stack">
                         <Label required>Per day ($)</Label>
                         <InputField
                             id="pricePerDay" type="number" value={form.pricePerDay}

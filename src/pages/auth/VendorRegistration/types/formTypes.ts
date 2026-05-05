@@ -25,4 +25,5 @@ export type Field = {
     placeholder?: string;
     section: 'personal' | 'business' | 'security';
     options?: string[];
+    required?: boolean;
 };

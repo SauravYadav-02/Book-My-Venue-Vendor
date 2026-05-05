@@ -2,11 +2,11 @@ import { STEPS } from "../types/Constants";
 
 function StepBar({ current }: { current: number }) {
     return (
-        <div className="flex items-center mb-8 overflow-x-auto pb-1">
+        <div className="flex items-center overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {STEPS.map((label, i) => (
                 <div key={i} className="flex items-center shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 transition-all duration-300
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-300
               ${i < current
                                 ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
                                 : i === current
@@ -19,13 +19,13 @@ function StepBar({ current }: { current: number }) {
                                 </svg>
                             ) : i + 1}
                         </div>
-                        <span className={`text-[13.5px] font-bold whitespace-nowrap transition-colors duration-300
+                        <span className={`text-sm font-bold whitespace-nowrap transition-colors duration-300
               ${i === current ? "text-emerald-700" : i < current ? "text-slate-600" : "text-slate-300"}`}>
                             {label}
                         </span>
                     </div>
                     {i < STEPS.length - 1 && (
-                        <div className={`w-10 h-1 rounded-full mx-4 transition-colors duration-300 ${i < current ? "bg-emerald-400/50" : "bg-slate-100"}`} />
+                        <div className={`mx-3 h-1 w-7 rounded-full transition-colors duration-300 sm:mx-4 sm:w-10 ${i < current ? "bg-emerald-400/50" : "bg-slate-100"}`} />
                     )}
                 </div>
             ))}

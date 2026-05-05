@@ -1,0 +1,95 @@
+import axios from "axios";
+
+const API_URL = "http://localhost:3000";
+
+// --- Types ---
+export interface Plan {
+  _id: string;
+  name: string;
+  duration_days: number;
+  price: number;
+  is_active: boolean;
+  features: string[];
+}
+
+export interface Subscription {
+  _id: string;
+  vendorId: string;
+  planId: Plan | string;
+  planSnapshot: {
+    name: string;
+    duration_days: number;
+    price: number;
+  };
+  status: "active" | "grace" | "expired";
+  startDate: string;
+  endDate: string;
+  graceEndDate: string;
+}
+
+export interface SubscriptionQueueItem {
+  _id: string;
+  planId: Plan;
+  planSnapshot: { name: string; duration_days: number; price: number };
+  position: number;
+  isActivated: boolean;
+  purchasedAt: string;
+}
+
+// --- Admin Services ---
+export const getAllPlansAdmin = async (adminId: string) => {
+  const res = await axios.get(`${API_URL}/plans/all`, {
+    headers: { adminid: adminId },
+  });
+  return res.data.plans;
+};
+
+export const createPlan = async (adminId: string, data: Partial<Plan>) => {
+  const res = await axios.post(`${API_URL}/plans`, data, {
+    headers: { adminid: adminId },
+  });
+  return res.data.plan;
+};
+
+export const updatePlan = async (adminId: string, planId: string, data: Partial<Plan>) => {
+  const res = await axios.put(`${API_URL}/plans/${planId}`, data, {
+    headers: { adminid: adminId },
+  });
+  return res.data.plan;
+};
+
+export const deletePlan = async (adminId: string, planId: string) => {
+  const res = await axios.delete(`${API_URL}/plans/${planId}`, {
+    headers: { adminid: adminId },
+  });
+  return res.data;
+};
+
+// --- Vendor Services ---
+export const getActivePlans = async () => {
+  const res = await axios.get(`${API_URL}/plans`);
+  return res.data.plans;
+};
+
+export const purchasePlan = async (vendorId: string, planId: string) => {
+  const res = await axios.post(
+    `${API_URL}/subscription/purchase`,
+    { planId },
+    { headers: { vendorid: vendorId } }
+  );
+  return res.data;
+};
+
+export const getCurrentSubscription = async (vendorId: string) => {
+  const res = await axios.get(`${API_URL}/subscription`, {
+    headers: { vendorid: vendorId },
+  });
+  return res.data.subscription;
+};
+
+export const getSubscriptionQueue = async (vendorId: string) => {
+  const res = await axios.get(`${API_URL}/subscription/queue`, {
+    headers: { vendorid: vendorId },
+  });
+  return res.data.queue;
+};

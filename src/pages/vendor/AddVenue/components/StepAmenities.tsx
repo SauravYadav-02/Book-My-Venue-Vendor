@@ -14,7 +14,7 @@ function StepAmenities({
     return (
         <>
             <SectionCard title="Amenities">
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2.5 sm:gap-3">
                     {ALL_AMENITIES.map((a) => {
                         const selected = form.amenities.has(a);
                         return (
@@ -22,10 +22,10 @@ function StepAmenities({
                                 key={a}
                                 type="button"
                                 onClick={() => updateAmenities(a)}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[14px] font-bold border-2 transition-all cursor-pointer
+                                className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold transition-all cursor-pointer
                   ${selected
                                         ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm shadow-emerald-500/10"
-                                        : "bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-700 hover:shadow-sm"
+                                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 hover:shadow-sm"
                                     }`}
                             >
                                 {selected && (
@@ -41,16 +41,16 @@ function StepAmenities({
             </SectionCard>
 
             <SectionCard title="Availability">
-                <div className="grid grid-cols-1 gap-4">
-                    <div>
-                        <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">
+                <div className="form-flow">
+                    <div className="field-stack">
+                        <label className="form-label">
                             Available From
                         </label>
                         <input
                             type="date"
                             value={form.availableFrom}
                             onChange={(e) => update("availableFrom", e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl text-sm bg-white border border-slate-200 text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium"
+                            className="form-control"
                         />
                     </div>
                 </div>

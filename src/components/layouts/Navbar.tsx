@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Bell, Search, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar: React.FC = () => {
     const [showProfileInfo, setShowProfileInfo] = useState(false);
@@ -42,27 +43,43 @@ const Navbar: React.FC = () => {
 
                 {/* ── Profile ────────────────────────────────────────────── */}
                 <div className="flex items-center gap-3 relative">
-                    {/* Text info */}
-                    <div className={`
-                        flex flex-col text-right transition-all duration-200
-                        ${showProfileInfo ? "absolute top-12 right-0 bg-white shadow-lg border border-gray-100 p-4 rounded-xl z-50 w-48 text-left" : "hidden"}
-                        md:flex! md:relative! md:top-0! md:bg-transparent! md:shadow-none! md:border-none! md:p-0! md:w-auto! md:text-right!
-                    `}>
+                    {/* Text info (Mobile Dropdown) */}
+                    <AnimatePresence>
+                        {showProfileInfo && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute top-12 right-0 bg-white shadow-lg border border-gray-100 p-4 rounded-xl z-50 w-48 text-left md:hidden"
+                            >
+                                <span className="font-medium text-gray-800 leading-tight text-sm block">
+                                    Alexander Sterling
+                                </span>
+                                <span className="text-gray-500 font-medium leading-tight mt-0.5 text-xs block">
+                                    Owner, Sterling Estates
+                                </span>
+                                
+                                {/* Logout Button (Mobile View Dropdown) */}
+                                <button 
+                                    onClick={handleLogout}
+                                    className="mt-3 flex items-center gap-2 text-red-500 font-medium text-sm hover:text-red-600 transition-colors w-full"
+                                >
+                                    <LogOut size={16} />
+                                    Logout
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Text info (Desktop) */}
+                    <div className="hidden md:flex flex-col text-right">
                         <span className="font-medium text-gray-800 leading-tight text-sm">
                             Alexander Sterling
                         </span>
                         <span className="text-gray-500 font-medium leading-tight mt-0.5 text-xs">
                             Owner, Sterling Estates
                         </span>
-                        
-                        {/* Logout Button (Mobile View Dropdown) */}
-                        <button 
-                            onClick={handleLogout}
-                            className="mt-3 flex items-center gap-2 text-red-500 font-medium text-sm hover:text-red-600 md:hidden transition-colors"
-                        >
-                            <LogOut size={16} />
-                            Logout
-                        </button>
                     </div>
 
                     {/* Avatar */}

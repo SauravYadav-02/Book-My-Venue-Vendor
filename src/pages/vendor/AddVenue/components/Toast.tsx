@@ -1,11 +1,22 @@
 function Toast({ message, show }: { message: string; show: boolean }) {
     if (!show) return null;
     return (
-        <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800
-      rounded-xl px-4 py-3 text-sm mb-5 animate-pulse">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
+        <div
+            className={[
+                "flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 mb-5",
+                // Responsive padding
+                "px-3 py-2.5 sm:px-4 sm:py-3",
+                // Responsive font size: xs=12px → sm=13px → md=14px
+                "text-xs sm:text-[13px] md:text-sm",
+                // Responsive font weight
+                "font-medium sm:font-semibold",
+            ].join(" ")}
+        >
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+            </span>
             {message}
         </div>
     );

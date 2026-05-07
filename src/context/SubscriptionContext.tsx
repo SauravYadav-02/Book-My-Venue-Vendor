@@ -3,7 +3,8 @@ import {
   getActivePlans,
   getCurrentSubscription,
   getSubscriptionQueue,
-  purchasePlan,
+  createPaymentIntent,
+  confirmPayment,
   type Plan,
   type Subscription,
   type SubscriptionQueueItem,
@@ -16,7 +17,8 @@ interface SubscriptionContextType {
   queue: SubscriptionQueueItem[];
   loading: boolean;
   refreshData: (vendorId: string) => Promise<void>;
-  buyPlan: (vendorId: string, planId: string) => Promise<void>;
+  createPayment: (vendorId: string, planId: string) => Promise<string>;
+  confirmSubscription: (vendorId: string, transactionId: string) => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -47,36 +49,50 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, []);
 
-  // Auto-fetch on mount if vendor is logged in
   useEffect(() => {
     const vendorId = localStorage.getItem("vendorId");
     if (vendorId) {
-      refreshData(vendorId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void refreshData(vendorId);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // only runs once on mount — refreshData is stable within this scope
+  }, [refreshData]);
 
-  const buyPlan = async (vendorId: string, planId: string) => {
+  const createPayment = async (vendorId: string, planId: string): Promise<string> => {
     try {
-      await purchasePlan(vendorId, planId);
+      const res = await createPaymentIntent(vendorId, planId);
+      return res.transactionId;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || "Failed to initialize payment.");
+      throw error;
+    }
+  };
+
+  const confirmSubscription = async (vendorId: string, transactionId: string): Promise<void> => {
+    try {
+      await confirmPayment(vendorId, transactionId);
       toast.success("Plan purchased successfully!");
       await refreshData(vendorId);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to purchase plan.");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err?.response?.data?.message || "Payment failed.");
+      throw error;
     }
   };
 
   return (
     <SubscriptionContext.Provider
-      value={{ availablePlans, currentSubscription, queue, loading, refreshData, buyPlan }}
+      value={{ availablePlans, currentSubscription, queue, loading, refreshData, createPayment, confirmSubscription }}
     >
       {children}
     </SubscriptionContext.Provider>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSubscription = () => {
   const context = useContext(SubscriptionContext);
   if (!context) throw new Error("useSubscription must be used within SubscriptionProvider");

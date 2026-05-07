@@ -22,6 +22,8 @@ import CalendarPage from "./pages/vendor/CalendarPage";
 import { SubscriptionProvider } from "./context/SubscriptionContext";
 import SubscriptionDashboard from "./pages/vendor/SubscriptionDashboard";
 import PlansManagement from "./pages/admin/PlansManagement";
+import VendorReviews from "./pages/vendor/VendorReviews";
+import AdminReviews from "./pages/admin/AdminReviews";
 
 // Wrapper to provide Subscription context to nested routes via Outlet
 const SubscriptionLayout = () => (
@@ -57,8 +59,12 @@ export default function App() {
             {/* Subscription & Billing */}
             <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
 
+            {/* Vendor Reviews */}
+            <Route path="/reviews" element={<Layout><VendorReviews /></Layout>} />
+
             {/* Admin Routes */}
             <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />
+            <Route path="/admin/reviews" element={<Layout><AdminReviews /></Layout>} />
           </Route>
         </Route>
 

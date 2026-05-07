@@ -22,7 +22,7 @@ export const COUNTRIES = ["United States", "India", "United Kingdom", "Canada", 
 export const INITIAL_FORM: VenueForm = {
     name: "", type: "", capacity: "", description: "",
     pricePerDay: "", availableFrom: "",
-    address: "", city: "", state: "", zip: "", country: "United States", lat: "", lng: "",
+    address: "", city: "", state: "", zip: "", country: "India", lat: "", lng: "",
     amenities: new Set(),
     mediaFiles: [],
 };

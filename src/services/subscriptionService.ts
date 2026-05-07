@@ -71,10 +71,19 @@ export const getActivePlans = async () => {
   return res.data.plans;
 };
 
-export const purchasePlan = async (vendorId: string, planId: string) => {
+export const createPaymentIntent = async (vendorId: string, planId: string) => {
   const res = await axios.post(
-    `${API_URL}/subscription/purchase`,
+    `${API_URL}/subscription/create-payment`,
     { planId },
+    { headers: { vendorid: vendorId } }
+  );
+  return res.data;
+};
+
+export const confirmPayment = async (vendorId: string, transactionId: string) => {
+  const res = await axios.post(
+    `${API_URL}/subscription/confirm-payment`,
+    { transactionId },
     { headers: { vendorid: vendorId } }
   );
   return res.data;

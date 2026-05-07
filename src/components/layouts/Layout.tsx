@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import VendorScreenDefault from './VendorScreenDefault'
+import { motion } from 'framer-motion'
 
 interface LayoutProps {
     children?: ReactNode
@@ -19,9 +20,14 @@ const Layout = ({ children }: LayoutProps) => {
                 <Navbar />
 
                 {/* Scrollable page content */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 lg:p-8">
+                <motion.main 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 lg:p-8"
+                >
                     {children || (<VendorScreenDefault />)}
-                </main>
+                </motion.main>
             </div>
         </div>
     )

@@ -39,7 +39,7 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
     };
 
     return (
-        <div 
+        <div
             onClick={onClick}
             className={`bg-white rounded-xl border border-slate-100/80 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col group/card ${onClick ? 'cursor-pointer' : ''}`}
         >
@@ -75,9 +75,8 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                                     {venue.mediaFiles.map((_, i) => (
                                         <div
                                             key={i}
-                                            className={`h-1 rounded-full transition-all ${
-                                                i === currentImageIndex ? 'bg-white w-2.5' : 'bg-white/60 hover:bg-white/90 w-1'
-                                            }`}
+                                            className={`h-1 rounded-full transition-all ${i === currentImageIndex ? 'bg-white w-2.5' : 'bg-white/60 hover:bg-white/90 w-1'
+                                                }`}
                                         />
                                     ))}
                                 </div>
@@ -103,8 +102,8 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                 {venue.status && (
                     <span className={`absolute top-2.5 right-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm
                         ${venue.status === 'approved' ? 'bg-emerald-500 text-white' :
-                          venue.status === 'rejected' ? 'bg-rose-500 text-white' :
-                          'bg-amber-400 text-white'} border border-white/20 backdrop-blur-sm`}>
+                            venue.status === 'rejected' ? 'bg-rose-500 text-white' :
+                                'bg-amber-400 text-white'} border border-white/20 backdrop-blur-sm`}>
                         {venue.status.charAt(0).toUpperCase() + venue.status.slice(1)}
                     </span>
                 )}

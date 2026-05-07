@@ -1,4 +1,3 @@
-
 import { COUNTRIES } from "../types/Constants";
 import type { FormErrors, VenueForm } from "../types/Interface";
 import InputField from "./InputField";
@@ -13,23 +12,25 @@ function StepLocation({
 }) {
     return (
         <SectionCard title="Location">
-            <div className="form-flow">
-                <div className="field-stack">
+            <div className="flex flex-col gap-3 sm:gap-4">
+
+                <div className="flex flex-col gap-1 sm:gap-1.5">
                     <Label required>Street address</Label>
                     <InputField
                         id="address" value={form.address} placeholder="e.g. 789 Wedding Lane"
                         onChange={(v) => update("address", v)} error={errors.address}
                     />
                 </div>
-                <div className="form-grid">
-                    <div className="field-stack">
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
                         <Label required>City</Label>
                         <InputField
                             id="city" value={form.city} placeholder="e.g. Springfield"
                             onChange={(v) => update("city", v)} error={errors.city}
                         />
                     </div>
-                    <div className="field-stack">
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
                         <Label required>State</Label>
                         <InputField
                             id="state" value={form.state} placeholder="e.g. Illinois"
@@ -37,16 +38,17 @@ function StepLocation({
                         />
                     </div>
                 </div>
-                <div className="form-grid">
-                    <div className="field-stack">
-                        <Label>ZIP code</Label>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
+                        <Label required>ZIP code</Label>
                         <InputField
                             id="zip" value={form.zip} placeholder="e.g. 62701"
                             onChange={(v) => update("zip", v)}
                         />
                     </div>
-                    <div className="field-stack">
-                        <Label>Country</Label>
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
+                        <Label required>Country</Label>
                         <SelectField
                             id="country" value={form.country}
                             options={COUNTRIES.map((c) => ({ label: c, value: c }))}
@@ -54,23 +56,30 @@ function StepLocation({
                         />
                     </div>
                 </div>
-                <div className="field-stack">
-                    <p className="form-label">
-                        Coordinates <span className="normal-case font-normal">(optional)</span>
-                    </p>
-                    <div className="form-grid">
+
+                <div className="flex flex-col gap-1 sm:gap-1.5">
+                    <Label>
+                        Coordinates{" "}
+                        {/* Responsive optional hint */}
+                        <span className="text-[10px] sm:text-xs font-normal text-slate-400 ml-1">(optional)</span>
+                    </Label>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                         <InputField
-                            id="lat" type="number" value={form.lat} placeholder="Latitude e.g. 39.7817"
-                            step="any" onChange={(v) => update("lat", v)}
+                            id="lat" type="number" value={form.lat}
+                            placeholder="Latitude e.g. 39.7817" step="any"
+                            onChange={(v) => update("lat", v)}
                         />
                         <InputField
-                            id="lng" type="number" value={form.lng} placeholder="Longitude e.g. -89.65"
-                            step="any" onChange={(v) => update("lng", v)}
+                            id="lng" type="number" value={form.lng}
+                            placeholder="Longitude e.g. -89.65" step="any"
+                            onChange={(v) => update("lng", v)}
                         />
                     </div>
                 </div>
+
             </div>
         </SectionCard>
     );
 }
+
 export default StepLocation;

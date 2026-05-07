@@ -190,7 +190,7 @@ export default function VenueList() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close button */}
-                        <button 
+                        <button
                             onClick={() => setSelectedVenue(null)}
                             className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-colors"
                         >
@@ -204,9 +204,9 @@ export default function VenueList() {
                             <div className="w-full h-64 bg-slate-100 relative group">
                                 {selectedVenue.mediaFiles && selectedVenue.mediaFiles.length > 0 ? (
                                     <>
-                                        <img 
-                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`} 
-                                            alt={`${selectedVenue.name} - image ${currentImageIndex + 1}`} 
+                                        <img
+                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
+                                            alt={`${selectedVenue.name} - image ${currentImageIndex + 1}`}
                                             className="w-full h-full object-cover"
                                         />
                                         {selectedVenue.mediaFiles.length > 1 && (
@@ -237,9 +237,8 @@ export default function VenueList() {
                                                     {selectedVenue.mediaFiles.map((_, i) => (
                                                         <div
                                                             key={i}
-                                                            className={`h-1.5 rounded-full transition-all shadow-sm ${
-                                                                i === currentImageIndex ? 'bg-white w-4' : 'bg-white/60 hover:bg-white/90 w-1.5'
-                                                            }`}
+                                                            className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentImageIndex ? 'bg-white w-4' : 'bg-white/60 hover:bg-white/90 w-1.5'
+                                                                }`}
                                                         />
                                                     ))}
                                                 </div>
@@ -254,14 +253,14 @@ export default function VenueList() {
                                     </div>
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
-                                
+
                                 <div className="absolute bottom-6 left-6 right-6">
                                     <div className="flex gap-2 mb-2">
                                         {selectedVenue.status && (
                                             <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-sm border border-white/20 backdrop-blur-sm
                                                 ${selectedVenue.status === 'approved' ? 'bg-emerald-500 text-white' :
-                                                selectedVenue.status === 'rejected' ? 'bg-rose-500 text-white' :
-                                                'bg-amber-400 text-white'}`}>
+                                                    selectedVenue.status === 'rejected' ? 'bg-rose-500 text-white' :
+                                                        'bg-amber-400 text-white'}`}>
                                                 {selectedVenue.status.charAt(0).toUpperCase() + selectedVenue.status.slice(1)}
                                             </span>
                                         )}
@@ -293,7 +292,7 @@ export default function VenueList() {
                                         <p className="text-xs text-slate-500 font-medium">Capacity</p>
                                         <p className="font-semibold text-slate-800">{selectedVenue.capacity || "N/A"}</p>
                                     </div>
-                                    
+
                                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 items-center text-center">
                                         <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-1">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -350,9 +349,9 @@ export default function VenueList() {
                                         </p>
                                     </div>
                                 )}
-                                
+
                             </div>
-                            
+
                             {/* Sticky Footer Actions */}
                             <div className="sticky bottom-0 bg-white border-t border-slate-100 p-4 md:px-8 md:py-5 flex gap-3 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
                                 <button

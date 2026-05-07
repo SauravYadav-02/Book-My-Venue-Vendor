@@ -8,6 +8,8 @@ import StepBasicInfo from "./AddVenue/components/StepBasicInfo";
 import StepLocation from "./AddVenue/components/StepLocation";
 import StepAmenities from "./AddVenue/components/StepAmenities";
 import StepReview from "./AddVenue/components/StepReview";
+import NavigationButtons from "./AddVenue/components/NavigationButtons";
+import SuccessScreen from "./AddVenue/components/SuccessScreen";
 import { createVenue } from "../../services/venueService";
 import { useSubscription } from "../../context/SubscriptionContext";
 import toastNotification from "react-hot-toast";
@@ -73,6 +75,8 @@ export default function AddVenue() {
       if (!form.address.trim()) errs.address = "Address is required";
       if (!form.city.trim()) errs.city = "City is required";
       if (!form.state.trim()) errs.state = "State is required";
+      if (!form.zip?.trim()) errs.zip = "ZIP code is required";
+      if (!form.country?.trim()) errs.country = "Country is required";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -106,51 +110,40 @@ export default function AddVenue() {
 
   if (submitted && !toast) {
     return (
-      <div className="flex-1 bg-slate-50 flex items-center justify-center p-6 relative">
+      <div className="flex-1 bg-slate-50 flex items-center justify-center p-4 sm:p-6 relative">
         {/* Subtle decorative background blobs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-x-1/3 translate-y-1/3" />
 
-        <div className="bg-white rounded-[2rem] p-10 sm:p-12 text-center shadow-[0_20px_50px_rgba(15,_118,_110,_0.05)] border border-slate-100 max-w-md w-full relative z-10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(15,_118,_110,_0.08)]">
-          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-4 ring-emerald-50/50">
-            <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">Venue Published!</h2>
-          <p className="text-base text-slate-500 mb-8 leading-relaxed">
-            <span className="font-semibold text-emerald-600">{form.name}</span> is now live, visible to customers, and ready to receive bookings.
-          </p>
-          <button
-            onClick={() => {
+        <div className="bg-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-12 shadow-[0_20px_50px_rgba(15,_118,_110,_0.05)] border border-slate-100 max-w-md w-full relative z-10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(15,_118,_110,_0.08)]">
+          <SuccessScreen
+            isEditing={false}
+            onReset={() => {
               setForm({ ...INITIAL_FORM, amenities: new Set() });
               setStep(0);
               setSubmitted(false);
             }}
-            className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-base font-bold transition-all shadow-md hover:shadow-emerald-500/25"
-          >
-            Add another venue
-          </button>
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 bg-slate-50 py-4 px-4 sm:py-6 sm:px-6 relative font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900 flex flex-col">
+    <div className="flex-1 bg-white sm:bg-slate-50 sm:p-6 md:p-8 relative font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900 flex flex-col items-center">
       {/* Subtle background decoration */}
-      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl max-h-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+      <div className="hidden sm:block absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl max-h-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
 
-      <div className="w-full bg-white rounded-2xl shadow-[0_20px_60px_rgba(15,_118,_110,_0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14 transition-all duration-300">
+      <div className="w-full max-w-4xl bg-white sm:rounded-3xl sm:shadow-[0_20px_60px_rgba(15,_118,_110,_0.04)] sm:border sm:border-slate-100/50 relative z-10 flex flex-col p-4 sm:p-10 transition-all duration-300">
 
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-10 gap-3 sm:gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold sm:font-extrabold text-slate-900 tracking-tight">Add new venue</h1>
-            <p className="text-sm sm:text-base md:text-lg text-slate-500 mt-1.5 sm:mt-2 font-medium sm:font-semibold">Build your listing profile step by step.</p>
+            <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold sm:font-extrabold text-slate-900 tracking-tight">Add new venue</h1>
+            <p className="text-xs sm:text-base md:text-lg text-slate-500 mt-1 sm:mt-2 font-medium sm:font-semibold">Build your listing profile step by step.</p>
           </div>
           <div className="flex flex-col items-start sm:items-end">
-            <span className="inline-flex items-center justify-center text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-4 py-1.5 font-bold shadow-sm whitespace-nowrap">
+            <span className="inline-flex items-center justify-center text-[11px] sm:text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 font-bold shadow-sm whitespace-nowrap">
               Step {step + 1} of {STEPS.length}
             </span>
           </div>
@@ -174,43 +167,15 @@ export default function AddVenue() {
         </div>
 
         {/* Footer Navigation Buttons */}
-        <div className="flex items-center justify-between mt-12 pt-6 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={handleBack}
-            className={`group flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm md:text-base font-bold border border-slate-200
-              text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all ${step === 0 ? "invisible" : ""}`}
-          >
-            <svg className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={loading}
-            className={`group flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl text-sm sm:text-base md:text-lg font-bold
-              bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white transition-all shadow-md hover:shadow-emerald-500/25 ${loading ? "opacity-60 cursor-not-allowed" : ""
-              }`}
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin -ml-1 mr-1 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Publishing...
-              </span>
-            ) : step === STEPS.length - 1 ? "Publish listing" : "Continue"}
-
-            {!loading && step < STEPS.length - 1 && (
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-              </svg>
-            )}
-          </button>
+        <div className="mt-8 sm:mt-12 pt-5 sm:pt-6 border-t border-slate-100">
+          <NavigationButtons
+            step={step}
+            totalSteps={STEPS.length}
+            loading={loading}
+            isEditing={false}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
         </div>
       </div>
     </div>

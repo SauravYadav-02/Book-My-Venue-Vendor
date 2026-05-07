@@ -1,12 +1,33 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
 import { Clock, AlertTriangle, CheckCircle, Package } from "lucide-react";
+import { currencyFormatter } from "../../utils/currency";
+import toast from "react-hot-toast";
 
 export default function SubscriptionDashboard() {
-  const { availablePlans, currentSubscription, queue, loading, refreshData, buyPlan } = useSubscription();
+  const { availablePlans, currentSubscription, queue, loading, refreshData, createPayment, confirmSubscription } = useSubscription();
+  const [processing, setProcessing] = useState<string | null>(null);
 
   // Fetch vendor ID precisely as stored by LoginPage.tsx
   const vendorId = localStorage.getItem("vendorId") || "";
+
+  const handleBuyPlan = async (planId: string) => {
+    if (!vendorId) return;
+    setProcessing(planId);
+    try {
+      const transactionId = await createPayment(vendorId, planId);
+      const isConfirmed = window.confirm("Simulate Payment: Click OK to confirm payment, or Cancel to simulate failure.");
+      if (isConfirmed) {
+        await confirmSubscription(vendorId, transactionId);
+      } else {
+        toast.error("Payment was cancelled.");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessing(null);
+    }
+  };
 
   useEffect(() => {
     if (vendorId) {
@@ -92,7 +113,7 @@ export default function SubscriptionDashboard() {
               <div key={q._id} className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
                 <div className="text-xs font-semibold text-indigo-500 uppercase mb-1">Queue Position #{idx + 1}</div>
                 <h3 className="font-bold text-gray-800">{q.planSnapshot.name}</h3>
-                <p className="text-sm text-gray-600">{q.planSnapshot.duration_days} Days / ₹{q.planSnapshot.price}</p>
+                <p className="text-sm text-gray-600">{q.planSnapshot.duration_days} Days / {currencyFormatter.format(q.planSnapshot.price)}</p>
                 <p className="text-xs text-gray-400 mt-2">Will auto-activate when current plan expires.</p>
               </div>
             ))}
@@ -110,7 +131,7 @@ export default function SubscriptionDashboard() {
               <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Access</p>
 
               <div className="mt-4 mb-6">
-                <span className="text-4xl font-extrabold text-gray-900">₹{plan.price}</span>
+                <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
@@ -123,10 +144,11 @@ export default function SubscriptionDashboard() {
               </ul>
 
               <button
-                onClick={() => buyPlan(vendorId, plan._id)}
-                className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
+                onClick={() => handleBuyPlan(plan._id)}
+                disabled={processing === plan._id}
+                className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center"
               >
-                {currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now"}
+                {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now")}
               </button>
             </div>
           ))}

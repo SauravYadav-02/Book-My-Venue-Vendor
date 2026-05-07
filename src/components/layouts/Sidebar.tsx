@@ -13,8 +13,10 @@ import {
     LogOut,
     Menu,
     X,
-    Package
+    Package,
+    Star
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSubscription } from "../../context/SubscriptionContext";
 import toast from "react-hot-toast";
 
@@ -25,6 +27,7 @@ const navItems = [
     { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
     { label: "Calendar", path: "/calendar", icon: Calendar },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
+    { label: "Reviews", path: "/reviews", icon: Star },
     { label: "Billing", path: "/billing", icon: Package },
     { label: "Settings", path: "/settings", icon: Settings },
 ];
@@ -131,12 +134,18 @@ const Sidebar = () => {
             </button>
 
             {/* ── Mobile overlay ── */}
-            {open && (
-                <div
-                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                    onClick={() => setOpen(false)}
-                />
-            )}
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden"
+                        onClick={() => setOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* ══ SIDEBAR ══════════════════════════════════════════════════════════ */}
             <aside

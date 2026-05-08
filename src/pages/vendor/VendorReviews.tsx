@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { getVenuesByVendor } from "../../services/venueService";
 import { getVendorReviews } from "../../services/ratingService";
 import { Star, Filter, ArrowUpDown, ChevronLeft, ChevronRight, MessageSquareOff } from "lucide-react";
@@ -29,6 +30,7 @@ export default function VendorReviews() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [analytics, setAnalytics] = useState<Analytics | null>(null);
     const [venues, setVenues] = useState<Venue[]>([]);
+    const [venueStats, setVenueStats] = useState<{ [key: string]: { averageRating: number; totalReviews: number } }>({});
     
     const [loading, setLoading] = useState(true);
     
@@ -69,6 +71,7 @@ export default function VendorReviews() {
             
             setReviews(data.reviews || []);
             if (data.analytics) setAnalytics(data.analytics);
+            if (data.venueStats) setVenueStats(data.venueStats);
             setTotalPages(data.totalPages || 1);
             setPage(data.currentPage || 1);
             
@@ -80,21 +83,18 @@ export default function VendorReviews() {
         }
     }, [vendorId, sort, selectedVenue, page]);
 
-
-
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchReviewsData();
     }, [fetchReviewsData]);
 
-    const renderStars = (rating: number) => {
+    const renderStars = (rating: number, size = 14) => {
         return (
-            <div className="flex gap-1">
+            <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
                     <Star 
                         key={i} 
-                        size={14} 
-                        className={i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"} 
+                        size={size} 
+                        className={i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200"} 
                     />
                 ))}
             </div>
@@ -102,58 +102,111 @@ export default function VendorReviews() {
     };
 
     return (
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 bg-slate-50 min-h-screen">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-slate-50 min-h-screen">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Reviews & Ratings</h1>
-                    <p className="text-slate-500 mt-1 text-sm">Manage feedback across all your venues.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Reviews & Ratings</h1>
+                    <p className="text-slate-500 mt-1">Track your performance and manage guest feedback.</p>
+                </div>
+                <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-sm font-medium text-slate-600">Live Feedback Stream</span>
                 </div>
             </div>
 
             {/* Analytics Section */}
             {analytics && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
-                        <p className="text-slate-500 font-medium mb-2">Average Rating</p>
-                        <div className="flex items-center gap-3">
-                            <h2 className="text-4xl font-extrabold text-slate-800">{analytics.averageRating}</h2>
-                            <Star className="text-yellow-400 fill-yellow-400" size={32} />
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {/* Overall Vendor Rating */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110 duration-500"></div>
+                        <p className="text-slate-400 font-semibold uppercase tracking-wider text-xs mb-4">Vendor Rating</p>
+                        <div className="flex flex-col items-center gap-1">
+                            <h2 className="text-6xl font-black text-slate-800 tabular-nums leading-none">{analytics.averageRating}</h2>
+                            <div className="mt-4">
+                                {renderStars(analytics.averageRating, 20)}
+                            </div>
                         </div>
-                        <p className="text-sm text-slate-400 mt-2">Across all your venues</p>
+                        <p className="text-sm text-slate-400 mt-6 font-medium">Global average score</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
-                        <p className="text-slate-500 font-medium mb-2">Total Reviews</p>
-                        <h2 className="text-4xl font-extrabold text-indigo-600">{analytics.totalReviews}</h2>
-                        <p className="text-sm text-slate-400 mt-2">Authentic feedback</p>
-                    </div>
+                    <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Rating Distribution */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <p className="text-slate-800 font-bold mb-6 flex items-center gap-2">
+                                <Filter size={18} className="text-indigo-500" />
+                                Score Distribution
+                            </p>
+                            <div className="space-y-3">
+                                {[5, 4, 3, 2, 1].map(star => {
+                                    const count = analytics.distribution[star] || 0;
+                                    const percentage = analytics.totalReviews > 0 ? (count / analytics.totalReviews) * 100 : 0;
+                                    return (
+                                        <div key={star} className="flex items-center gap-4 text-sm">
+                                            <div className="flex items-center gap-1 w-12 shrink-0">
+                                                <span className="font-bold text-slate-700">{star}</span>
+                                                <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                                            </div>
+                                            <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                                                <motion.div 
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${percentage}%` }}
+                                                    transition={{ duration: 1, ease: "easeOut" }}
+                                                    className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full"
+                                                />
+                                            </div>
+                                            <div className="w-10 text-right font-semibold text-slate-500 tabular-nums">{count}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p className="text-slate-500 font-medium mb-4 text-center">Rating Distribution</p>
-                        <div className="space-y-2">
-                            {[5, 4, 3, 2, 1].map(star => {
-                                const count = analytics.distribution[star] || 0;
-                                const percentage = analytics.totalReviews > 0 ? (count / analytics.totalReviews) * 100 : 0;
-                                return (
-                                    <div key={star} className="flex items-center gap-3 text-sm">
-                                        <div className="flex items-center gap-1 w-10">
-                                            <span className="font-medium text-slate-600">{star}</span>
-                                            <Star className="text-yellow-400 fill-yellow-400" size={12} />
-                                        </div>
-                                        <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-yellow-400 rounded-full"
-                                                style={{ width: `${percentage}%` }}
-                                            />
-                                        </div>
-                                        <div className="w-8 text-right text-slate-500 text-xs">{count}</div>
-                                    </div>
-                                );
-                            })}
+                        {/* Summary Metrics */}
+                        <div className="grid grid-cols-1 gap-6">
+                            <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-3xl shadow-lg shadow-indigo-200 text-white flex flex-col justify-between">
+                                <p className="font-medium opacity-80">Total Reviews Received</p>
+                                <div className="flex items-baseline gap-2 mt-4">
+                                    <h2 className="text-5xl font-black">{analytics.totalReviews}</h2>
+                                    <span className="text-indigo-200 font-medium">Feedbacks</span>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-sm">
+                                    <span>Verified responses</span>
+                                    <ArrowUpDown size={16} className="opacity-50" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* Venue Performance Section */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <Star className="text-indigo-500 fill-indigo-500" size={20} />
+                    Venue Performance
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {venues.map(venue => {
+                        const stats = venueStats[venue._id] || { averageRating: 0, totalReviews: 0 };
+                        return (
+                            <div key={venue._id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all hover:shadow-md group">
+                                <h4 className="font-bold text-slate-700 truncate group-hover:text-indigo-600 transition-colors">{venue.name}</h4>
+                                <div className="flex items-center gap-2 mt-3">
+                                    <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
+                                        <span className="text-sm font-black text-slate-800">{stats.averageRating}</span>
+                                        <Star className="text-yellow-400 fill-yellow-400" size={12} />
+                                    </div>
+                                    <span className="text-xs text-slate-400 font-medium">{stats.totalReviews} Reviews</span>
+                                </div>
+                                <div className="mt-3">
+                                    {renderStars(stats.averageRating, 12)}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
 
             {/* Filters */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">

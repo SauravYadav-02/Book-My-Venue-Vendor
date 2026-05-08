@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 import type { Venue } from "../../../../services/venueService";
 import { currencyFormatter } from "../../../../utils/currency";
 
@@ -112,12 +113,20 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
             {/* Body */}
             <div className="p-4 flex flex-col gap-3 flex-1">
 
-                {/* Name + Location */}
-                <div>
-                    <h3 className="font-bold text-slate-800 text-sm leading-tight truncate">{venue.name}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate font-medium">
-                        {[venue.city, venue.state].filter(Boolean).join(", ")}
-                    </p>
+                {/* Name + Location + Rating */}
+                <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-slate-800 text-sm leading-tight truncate">{venue.name}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5 truncate font-medium">
+                            {[venue.city, venue.state].filter(Boolean).join(", ")}
+                        </p>
+                    </div>
+                    {venue.averageRating !== undefined && venue.averageRating > 0 && (
+                        <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-0.5 rounded border border-yellow-100 shrink-0 ml-2">
+                            <span className="text-[10px] font-bold text-yellow-700">{venue.averageRating}</span>
+                            <Star className="text-yellow-500 fill-yellow-500" size={10} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Admin Message */}

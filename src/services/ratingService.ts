@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Assuming backend is at 5000 based on the current axios calls in VendorReviews
-const API_URL = "http://localhost:5000";
+// Assuming backend is at 3000 based on standard project configuration
+const API_URL = "http://localhost:3000";
 
 const api = axios.create({
     baseURL: API_URL,

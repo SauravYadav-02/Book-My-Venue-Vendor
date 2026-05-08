@@ -37,6 +37,9 @@ export interface Venue {
 
     adminDescription?: string;
 
+    averageRating?: number;
+    totalReviews?: number;
+
     createdAt?: string;
     updatedAt?: string;
 }

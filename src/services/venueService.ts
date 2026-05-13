@@ -19,6 +19,11 @@ export interface Venue {
 
     pricePerDay?: number;
 
+    // ✅ Per-plate catering cost (added in backend schema)
+    perPlateCost?: number | null;
+    vegPrice?: number | null;
+    nonVegPrice?: number | null;
+
     address?: string;
     city?: string;
     state?: string;
@@ -144,9 +149,12 @@ export const getVenues = async (): Promise<Venue[]> => {
 };
 
 // READ VENDOR'S OWN VENUES
+// Passes ownerId so the backend skips subscription/status filters — vendor sees ALL their venues
 export const getVenuesByVendor = async (vendorId: string): Promise<Venue[]> => {
     try {
-        const response = await api.get<Venue[]>(`/venues/vendor/${vendorId}`);
+        const response = await api.get<Venue[]>(`/venues/vendor/${vendorId}`, {
+            params: { ownerId: vendorId },
+        });
         return response.data.map(normalizeVenue);
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {

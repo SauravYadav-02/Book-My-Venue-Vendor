@@ -72,21 +72,73 @@ function StepBasicInfo({
                 </div>
             </SectionCard>
 
-            <SectionCard title="Pricing">
-                <div className="flex flex-col gap-1 sm:gap-1.5">
-                    <Label required>Per day ({currencyFormatter.resolvedOptions().currency})</Label>
-                    <div className="relative">
-                        {/* Currency symbol prefix — responsive size */}
-                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium sm:font-semibold text-slate-400 sm:left-4">
-                            {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
-                        </span>
-                        <div className="pl-6 sm:pl-8">
-                            <InputField
-                                id="pricePerDay" type="number" value={form.pricePerDay}
-                                placeholder="3000" min="0"
-                                onChange={(v) => update("pricePerDay", v)} error={errors.pricePerDay}
-                            />
+            <SectionCard title="Pricing & Catering">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1 sm:gap-1.5 sm:col-span-2">
+                        <Label required>Per day ({currencyFormatter.resolvedOptions().currency})</Label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium sm:font-semibold text-slate-400 sm:left-4">
+                                {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
+                            </span>
+                            <div className="pl-6 sm:pl-8">
+                                <InputField
+                                    id="pricePerDay" type="number" value={form.pricePerDay}
+                                    placeholder="e.g. 50,000" min="0"
+                                    onChange={(v) => update("pricePerDay", v)} error={errors.pricePerDay}
+                                />
+                            </div>
                         </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
+                        <Label>Veg Plate Price</Label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium text-slate-400 sm:left-4">
+                                {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
+                            </span>
+                            <div className="pl-6 sm:pl-8">
+                                <InputField
+                                    id="vegPrice" type="number" value={form.vegPrice}
+                                    placeholder="e.g. 800" min="0"
+                                    onChange={(v) => update("vegPrice", v)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 sm:gap-1.5">
+                        <Label>Non-Veg Plate Price</Label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium text-slate-400 sm:left-4">
+                                {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
+                            </span>
+                            <div className="pl-6 sm:pl-8">
+                                <InputField
+                                    id="nonVegPrice" type="number" value={form.nonVegPrice}
+                                    placeholder="e.g. 1200" min="0"
+                                    onChange={(v) => update("nonVegPrice", v)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 sm:gap-1.5 sm:col-span-2">
+                        <Label>Standard Plate Cost (Generic)</Label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium text-slate-400 sm:left-4">
+                                {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
+                            </span>
+                            <div className="pl-6 sm:pl-8">
+                                <InputField
+                                    id="perPlateCost" type="number" value={form.perPlateCost}
+                                    placeholder="e.g. 1000" min="0"
+                                    onChange={(v) => update("perPlateCost", v)}
+                                />
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1 italic">
+                            * Fill either Veg/Non-Veg or Standard plate cost based on your service.
+                        </p>
                     </div>
                 </div>
             </SectionCard>

@@ -4,6 +4,7 @@ import {
   type VendorPaymentBooking,
 } from "../../services/paymentService";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 import {
   CheckCircle2,
   XCircle,
@@ -294,11 +295,7 @@ const Bookings = () => {
                         <div className="flex items-center gap-2 text-gray-600">
                           <CalendarDays size={14} className="text-gray-400 shrink-0" />
                           <span className="text-sm">
-                            {new Date(booking.date).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
+                            {format(new Date(booking.date), 'dd/MM/yyyy')}
                           </span>
                         </div>
                       </td>

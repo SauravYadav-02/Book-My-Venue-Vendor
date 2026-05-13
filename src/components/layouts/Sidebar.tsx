@@ -14,7 +14,8 @@ import {
     Menu,
     X,
     Package,
-    Star
+    Star,
+    History
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSubscription } from "../../context/SubscriptionContext";
@@ -29,6 +30,7 @@ const navItems = [
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
     { label: "Reviews", path: "/reviews", icon: Star },
     { label: "Billing", path: "/billing", icon: Package },
+    { label: "Payments", path: "/payments", icon: History },
     { label: "Settings", path: "/settings", icon: Settings },
 ];
 

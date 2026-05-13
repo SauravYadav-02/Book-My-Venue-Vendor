@@ -16,9 +16,7 @@ export async function createVendor(
     formData.append("status", "pending");
     formData.append("adminMessage", "");
 
-    const res = await axios.post<Vendor>(API_URL, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-    });
+    const res = await axios.post<Vendor>(API_URL, formData);
 
     return res.data;
 }

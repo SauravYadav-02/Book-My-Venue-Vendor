@@ -4,6 +4,7 @@ import { getVenuesByVendor } from "../../services/venueService";
 import { getVendorReviews } from "../../services/ratingService";
 import { Star, Filter, ArrowUpDown, ChevronLeft, ChevronRight, MessageSquareOff } from "lucide-react";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 
 interface Review {
     _id: string;
@@ -31,9 +32,9 @@ export default function VendorReviews() {
     const [analytics, setAnalytics] = useState<Analytics | null>(null);
     const [venues, setVenues] = useState<Venue[]>([]);
     const [venueStats, setVenueStats] = useState<{ [key: string]: { averageRating: number; totalReviews: number } }>({});
-    
+
     const [loading, setLoading] = useState(true);
-    
+
     // Filters and Pagination
     const [sort, setSort] = useState("latest");
     const [selectedVenue, setSelectedVenue] = useState("all");
@@ -49,7 +50,7 @@ export default function VendorReviews() {
                 if (!vendorId) return;
                 const data = await getVenuesByVendor(vendorId);
                 // The service returns the venues, we map to the local Venue interface
-                setVenues(data.map(v => ({ _id: v._id, name: v.name }))); 
+                setVenues(data.map(v => ({ _id: v._id, name: v.name })));
             } catch (error) {
                 console.error("Failed to fetch venues", error);
             }
@@ -61,20 +62,20 @@ export default function VendorReviews() {
         try {
             setLoading(true);
             if (!vendorId) return;
-            
+
             const data = await getVendorReviews(vendorId, {
                 sort,
                 venueId: selectedVenue,
                 page,
                 limit
             });
-            
+
             setReviews(data.reviews || []);
             if (data.analytics) setAnalytics(data.analytics);
             if (data.venueStats) setVenueStats(data.venueStats);
             setTotalPages(data.totalPages || 1);
             setPage(data.currentPage || 1);
-            
+
         } catch (error) {
             console.error("Failed to fetch reviews", error);
             toast.error("Failed to load reviews.");
@@ -91,10 +92,10 @@ export default function VendorReviews() {
         return (
             <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                    <Star 
-                        key={i} 
-                        size={size} 
-                        className={i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200"} 
+                    <Star
+                        key={i}
+                        size={size}
+                        className={i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}
                     />
                 ))}
             </div>
@@ -148,7 +149,7 @@ export default function VendorReviews() {
                                                 <Star className="text-yellow-400 fill-yellow-400" size={14} />
                                             </div>
                                             <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                                                <motion.div 
+                                                <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${percentage}%` }}
                                                     transition={{ duration: 1, ease: "easeOut" }}
@@ -212,8 +213,8 @@ export default function VendorReviews() {
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Filter size={18} className="text-slate-400" />
-                    <select 
-                        value={selectedVenue} 
+                    <select
+                        value={selectedVenue}
                         onChange={(e) => { setSelectedVenue(e.target.value); setPage(1); }}
                         className="bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:w-64 p-2.5 outline-none text-sm"
                     >
@@ -226,8 +227,8 @@ export default function VendorReviews() {
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <ArrowUpDown size={18} className="text-slate-400" />
-                    <select 
-                        value={sort} 
+                    <select
+                        value={sort}
                         onChange={(e) => { setSort(e.target.value); setPage(1); }}
                         className="bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:w-48 p-2.5 outline-none text-sm"
                     >
@@ -271,21 +272,16 @@ export default function VendorReviews() {
                                                     {review.venueId?.name || "Unknown Venue"}
                                                 </span>
                                                 <span className="text-xs text-slate-400">
-                                                    {new Date(review.createdAt).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
+                                                    {format(new Date(review.createdAt), 'dd/MM/yyyy')}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="md:text-right">
-                                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                            review.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                            review.status === 'rejected' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
-                                            'bg-amber-100 text-amber-700 border border-amber-200'
-                                        }`}>
+                                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${review.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                review.status === 'rejected' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                                                    'bg-amber-100 text-amber-700 border border-amber-200'
+                                            }`}>
                                             {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
                                         </span>
                                     </div>

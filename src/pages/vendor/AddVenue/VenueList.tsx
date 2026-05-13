@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getVenuesByVendor, deleteVenue, type Venue } from "../../../services/venueService";
 import VenueCard from "../EditVenues/components/VenueCard";
 import { currencyFormatter } from "../../../utils/currency";
+import { format } from "date-fns";
 
 export default function VenueList() {
     const navigate = useNavigate();
@@ -307,7 +308,7 @@ export default function VenueList() {
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                             </div>
                                             <p className="text-xs text-slate-500 font-medium">Available From</p>
-                                            <p className="font-semibold text-slate-800">{new Date(selectedVenue.availableFrom).toLocaleDateString()}</p>
+                                            <p className="font-semibold text-slate-800">{format(new Date(selectedVenue.availableFrom), 'dd/MM/yyyy')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -318,6 +319,36 @@ export default function VenueList() {
                                         <h3 className="text-lg font-bold text-slate-800 mb-3">About this venue</h3>
                                         <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line bg-slate-50/50 p-4 rounded-xl border border-slate-100">
                                             {selectedVenue.description}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ✅ Per-Plate Pricing (new backend fields) */}
+                                {(selectedVenue.vegPrice || selectedVenue.nonVegPrice || selectedVenue.perPlateCost) && (
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-800 mb-3">Catering Pricing</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            {selectedVenue.vegPrice && (
+                                                <div className="bg-green-50 border border-green-100 p-3 rounded-xl text-center">
+                                                    <p className="text-xs text-green-600 font-semibold mb-1">🟢 Veg Plate</p>
+                                                    <p className="text-base font-bold text-green-800">{currencyFormatter.format(Number(selectedVenue.vegPrice))}</p>
+                                                    <p className="text-[10px] text-green-500">per plate</p>
+                                                </div>
+                                            )}
+                                            {selectedVenue.nonVegPrice && (
+                                                <div className="bg-red-50 border border-red-100 p-3 rounded-xl text-center">
+                                                    <p className="text-xs text-red-600 font-semibold mb-1">🔴 Non-Veg Plate</p>
+                                                    <p className="text-base font-bold text-red-800">{currencyFormatter.format(Number(selectedVenue.nonVegPrice))}</p>
+                                                    <p className="text-[10px] text-red-500">per plate</p>
+                                                </div>
+                                            )}
+                                            {selectedVenue.perPlateCost && (
+                                                <div className="bg-amber-50 border border-amber-100 p-3 rounded-xl text-center">
+                                                    <p className="text-xs text-amber-600 font-semibold mb-1">🍽️ Standard Plate</p>
+                                                    <p className="text-base font-bold text-amber-800">{currencyFormatter.format(Number(selectedVenue.perPlateCost))}</p>
+                                                    <p className="text-[10px] text-amber-500">per plate</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}

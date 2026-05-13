@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getVendorBookings, type Booking } from "../../services/bookingService";
 import { currencyFormatter } from "../../utils/currency";
+import { format } from "date-fns";
 
 const CalendarPage = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -49,8 +50,12 @@ const CalendarPage = () => {
     // Check if a specific date has any approved bookings
     const getDateString = (day: number) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
+    // ✅ FIX: Include all active statuses.
+    // Bookings via the mock payment flow are set to "success" (not "approved").
+    // Only exclude explicitly cancelled, rejected, or failed bookings.
+    const ACTIVE_STATUSES = ["approved", "success", "pending"];
     const getBookingsForDateString = (dateStr: string) => {
-        return bookings.filter(b => b.date === dateStr && b.status === "approved");
+        return bookings.filter(b => b.date === dateStr && ACTIVE_STATUSES.includes(b.status));
     };
 
     const getBookingsForDate = (day: number) => {
@@ -137,7 +142,7 @@ const CalendarPage = () => {
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-800">
-                                    Bookings for {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    Bookings for {format(new Date(selectedDate), 'dd/MM/yyyy')}
                                 </h2>
                                 <p className="text-sm text-gray-500 mt-1">
                                     {selectedBookings.length} {selectedBookings.length === 1 ? 'venue booked' : 'venues booked'}
@@ -167,7 +172,13 @@ const CalendarPage = () => {
                                             <div className="flex justify-between items-start mb-4">
                                                 <div>
                                                     <h3 className="text-lg font-bold text-gray-900">{b.venueId?.name || "Unknown Venue"}</h3>
-                                                    <p className="text-sm font-medium text-emerald-600 bg-emerald-50 inline-flex px-2 py-0.5 rounded mt-1">Approved</p>
+                                                    <p className={`text-sm font-medium inline-flex px-2 py-0.5 rounded mt-1 ${
+                                                        b.status === "approved" ? "text-emerald-600 bg-emerald-50" :
+                                                        b.status === "success"  ? "text-blue-600 bg-blue-50" :
+                                                        "text-amber-600 bg-amber-50"
+                                                    }`}>
+                                                        {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
+                                                    </p>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-lg font-bold text-gray-900">{currencyFormatter.format(b.cost || 0)}</p>
@@ -193,7 +204,7 @@ const CalendarPage = () => {
                                                     <div>
                                                         <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-0.5">Booking Details</p>
                                                         <p className="text-sm font-semibold text-gray-800">Booking ID: <span className="font-mono text-xs">{b._id?.slice(-8) || "N/A"}</span></p>
-                                                        <p className="text-xs text-gray-500">Created: {new Date(b.createdAt || new Date()).toLocaleDateString()}</p>
+                                                        <p className="text-xs text-gray-500">Created: {format(new Date(b.createdAt || new Date()), 'dd/MM/yyyy')}</p>
                                                     </div>
                                                 </div>
                                             </div>

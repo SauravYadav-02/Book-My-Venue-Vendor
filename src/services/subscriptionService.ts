@@ -25,6 +25,13 @@ export interface Subscription {
   startDate: string;
   endDate: string;
   graceEndDate: string;
+  // ✅ New enriched fields from backend restructuring
+  adminId?: string | null;
+  adminName?: string;
+  vendorName?: string;
+  vendorEmail?: string;
+  userName?: string;
+  userEmail?: string;
 }
 
 export interface SubscriptionQueueItem {

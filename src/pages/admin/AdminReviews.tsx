@@ -24,7 +24,7 @@ export default function AdminReviews() {
         try {
             // using admin token if exists, otherwise assume mock or global admin route
             const token = localStorage.getItem("token") || "";
-            const res = await axios.get("http://localhost:5000/api/admin/reviews", {
+            const res = await axios.get("http://localhost:3000/admin/reviews", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setReviews(res.data);
@@ -42,7 +42,7 @@ export default function AdminReviews() {
     const updateStatus = async (venueId: string, reviewId: string, status: string) => {
         try {
             const token = localStorage.getItem("token") || "";
-            await axios.patch(`http://localhost:5000/api/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
+            await axios.patch(`http://localhost:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(`Review ${status} successfully`);

@@ -90,6 +90,22 @@ export default function SubscriptionDashboard() {
                   Ends in {calculateDaysRemaining(currentSubscription.graceEndDate)} days. Renew now to prevent venue hiding.
                 </p>
               )}
+
+              {/* ✅ Enriched subscription metadata from backend */}
+              <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500">
+                {currentSubscription.vendorName && (
+                  <p><span className="font-semibold text-gray-700">Vendor:</span> {currentSubscription.vendorName}</p>
+                )}
+                {currentSubscription.vendorEmail && (
+                  <p><span className="font-semibold text-gray-700">Email:</span> {currentSubscription.vendorEmail}</p>
+                )}
+                {currentSubscription.adminName && (
+                  <p><span className="font-semibold text-gray-700">Assigned by:</span> {currentSubscription.adminName}</p>
+                )}
+                {currentSubscription.startDate && (
+                  <p><span className="font-semibold text-gray-700">Started:</span> {new Date(currentSubscription.startDate).toLocaleDateString('en-GB')}</p>
+                )}
+              </div>
             </div>
           ) : (
             <div className="text-gray-500 flex flex-col items-start gap-2">

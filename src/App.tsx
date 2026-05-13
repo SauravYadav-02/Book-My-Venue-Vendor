@@ -18,6 +18,7 @@ import EditVenue from "./pages/vendor/EditVenues/EditVenue";
 
 import Bookings from "./pages/vendor/Bookings";
 import CalendarPage from "./pages/vendor/CalendarPage";
+import PaymentHistory from "./pages/vendor/PaymentHistory";
 
 import { SubscriptionProvider } from "./context/SubscriptionContext";
 import SubscriptionDashboard from "./pages/vendor/SubscriptionDashboard";
@@ -58,6 +59,9 @@ export default function App() {
 
             {/* Subscription & Billing */}
             <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
+
+            {/* Payment History (new - backed by PaymentHistory collection) */}
+            <Route path="/payments" element={<Layout><PaymentHistory /></Layout>} />
 
             {/* Vendor Reviews */}
             <Route path="/reviews" element={<Layout><VendorReviews /></Layout>} />

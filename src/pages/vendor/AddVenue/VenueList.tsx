@@ -323,8 +323,8 @@ export default function VenueList() {
                                     </div>
                                 )}
 
-                                {/* ✅ Per-Plate Pricing (new backend fields) */}
-                                {(selectedVenue.vegPrice || selectedVenue.nonVegPrice || selectedVenue.perPlateCost) && (
+                                {/* ✅ Per-Plate Pricing (veg / non-veg only) */}
+                                {(selectedVenue.vegPrice || selectedVenue.nonVegPrice) && (
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-800 mb-3">Catering Pricing</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -340,13 +340,6 @@ export default function VenueList() {
                                                     <p className="text-xs text-red-600 font-semibold mb-1">🔴 Non-Veg Plate</p>
                                                     <p className="text-base font-bold text-red-800">{currencyFormatter.format(Number(selectedVenue.nonVegPrice))}</p>
                                                     <p className="text-[10px] text-red-500">per plate</p>
-                                                </div>
-                                            )}
-                                            {selectedVenue.perPlateCost && (
-                                                <div className="bg-amber-50 border border-amber-100 p-3 rounded-xl text-center">
-                                                    <p className="text-xs text-amber-600 font-semibold mb-1">🍽️ Standard Plate</p>
-                                                    <p className="text-base font-bold text-amber-800">{currencyFormatter.format(Number(selectedVenue.perPlateCost))}</p>
-                                                    <p className="text-[10px] text-amber-500">per plate</p>
                                                 </div>
                                             )}
                                         </div>

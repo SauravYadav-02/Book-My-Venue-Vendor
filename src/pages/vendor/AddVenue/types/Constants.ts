@@ -21,7 +21,7 @@ export const COUNTRIES = ["United States", "India", "United Kingdom", "Canada", 
 
 export const INITIAL_FORM: VenueForm = {
     name: "", type: "", capacity: "", description: "",
-    pricePerDay: "", perPlateCost: "", vegPrice: "", nonVegPrice: "",
+    pricePerDay: "", vegPrice: "", nonVegPrice: "",
     availableFrom: "",
     address: "", city: "", state: "", zip: "", country: "India", lat: "", lng: "",
     amenities: new Set(),

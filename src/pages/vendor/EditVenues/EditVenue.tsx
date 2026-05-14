@@ -43,7 +43,6 @@ export default function EditVenue() {
                     capacity: venue.capacity ? String(venue.capacity) : "",
                     description: venue.description || "",
                     pricePerDay: venue.pricePerDay ? String(venue.pricePerDay) : "",
-                    perPlateCost: venue.perPlateCost ? String(venue.perPlateCost) : "",
                     vegPrice: venue.vegPrice ? String(venue.vegPrice) : "",
                     nonVegPrice: venue.nonVegPrice ? String(venue.nonVegPrice) : "",
                     address: venue.address || "",

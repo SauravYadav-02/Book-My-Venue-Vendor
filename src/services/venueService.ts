@@ -19,8 +19,7 @@ export interface Venue {
 
     pricePerDay?: number;
 
-    // ✅ Per-plate catering cost (added in backend schema)
-    perPlateCost?: number | null;
+    // ✅ Per-plate catering cost (veg / non-veg only)
     vegPrice?: number | null;
     nonVegPrice?: number | null;
 

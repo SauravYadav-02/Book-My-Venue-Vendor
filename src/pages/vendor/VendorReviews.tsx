@@ -239,6 +239,9 @@ export default function VendorReviews() {
                 </div>
             </div>
 
+
+
+
             {/* Reviews List */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[400px] relative">
                 {loading ? (
@@ -279,8 +282,8 @@ export default function VendorReviews() {
                                     </div>
                                     <div className="md:text-right">
                                         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${review.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                                review.status === 'rejected' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
-                                                    'bg-amber-100 text-amber-700 border border-amber-200'
+                                            review.status === 'rejected' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                                                'bg-amber-100 text-amber-700 border border-amber-200'
                                             }`}>
                                             {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
                                         </span>

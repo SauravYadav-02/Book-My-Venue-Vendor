@@ -55,7 +55,6 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // eslint-disable-next-line react-hooks/set-state-in-effect
       void refreshData(vendorId);
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
   }, [refreshData]);

@@ -8,16 +8,17 @@ import { format } from "date-fns";
 export default function VenueList() {
     const navigate = useNavigate();
     const [venues, setVenues] = useState<Venue[]>([]);
+    const [pagination, setPagination] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
     const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         if (selectedVenue) {
-            setCurrentImageIndex(0);
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'unset';
@@ -27,27 +28,31 @@ export default function VenueList() {
         };
     }, [selectedVenue]);
 
-    const fetchVenues = async () => {
-        try {
-            setLoading(true);
-            const vendorId = localStorage.getItem("vendorId");
-            if (!vendorId) {
-                setError("You must be logged in as a vendor to view your venues.");
-                setLoading(false);
-                return;
-            }
-            const data = await getVenuesByVendor(vendorId);
-            setVenues(data);
-        } catch {
-            setError("Failed to load venues. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchVenues();
-    }, []);
+        const fetchVenuesData = async () => {
+            try {
+                const vendorId = localStorage.getItem("vendorId");
+                if (!vendorId) {
+                    setError("You must be logged in as a vendor to view your venues.");
+                    setLoading(false);
+                    return;
+                }
+                const response = await getVenuesByVendor(vendorId, { page, limit: 12 });
+                setVenues(response.data || []);
+                setPagination({
+                    totalRecords: response.totalRecords,
+                    totalPages: response.totalPages,
+                    page: response.page,
+                    limit: response.limit
+                });
+            } catch {
+                setError("Failed to load venues. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchVenuesData();
+    }, [page]);
 
     const handleDelete = async () => {
         if (!deleteId) return;
@@ -83,7 +88,7 @@ export default function VenueList() {
                     <div>
                         <h1 className="text-2xl font-bold text-slate-800 tracking-tight">My venues</h1>
                         <p className="text-sm text-slate-400 mt-0.5">
-                            {venues.length} listing{venues.length !== 1 ? "s" : ""} published
+                            {pagination?.totalRecords || 0} listing{(pagination?.totalRecords !== 1) ? "s" : ""} published
                         </p>
                     </div>
                     <button
@@ -122,17 +127,58 @@ export default function VenueList() {
                         </button>
                     </div>
                 ) : (
-                    /* Cards grid */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-                        {venues.map((venue) => (
-                            <VenueCard
-                                key={venue._id}
-                                venue={venue}
-                                onEdit={() => navigate(`/venue/edit/${venue._id}`)}
-                                onDelete={() => setDeleteId(venue._id)}
-                                onClick={() => setSelectedVenue(venue)}
-                            />
-                        ))}
+                    <div className="flex flex-col gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                            {venues.map((venue) => (
+                                <VenueCard
+                                    key={venue._id}
+                                    venue={venue}
+                                    onEdit={() => navigate(`/venue/edit/${venue._id}`)}
+                                    onDelete={() => setDeleteId(venue._id)}
+                                    onClick={() => {
+                                        setCurrentImageIndex(0);
+                                        setSelectedVenue(venue);
+                                    }}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {pagination && pagination.totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-2 pb-8">
+                                <button
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                    className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all"
+                                >
+                                    Previous
+                                </button>
+                                
+                                <div className="flex items-center gap-1.5">
+                                    {[...Array(pagination.totalPages)].map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setPage(i + 1)}
+                                            className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${
+                                                page === i + 1 
+                                                ? "bg-emerald-500 text-white shadow-md shadow-emerald-200" 
+                                                : "text-slate-400 hover:bg-slate-100"
+                                            }`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                                    disabled={page === pagination.totalPages}
+                                    className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -206,7 +252,7 @@ export default function VenueList() {
                                 {selectedVenue.mediaFiles && selectedVenue.mediaFiles.length > 0 ? (
                                     <>
                                         <img
-                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
+                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : /* `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}` */ `http://10.113.216.96:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
                                             alt={`${selectedVenue.name} - image ${currentImageIndex + 1}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -265,11 +311,16 @@ export default function VenueList() {
                                                 {selectedVenue.status.charAt(0).toUpperCase() + selectedVenue.status.slice(1)}
                                             </span>
                                         )}
-                                        {selectedVenue.type && (
-                                            <span className="text-xs font-semibold bg-white/95 text-slate-700 px-2.5 py-1 rounded-md shadow-sm border border-white backdrop-blur-sm">
-                                                {selectedVenue.type}
+                                        {selectedVenue.isSubscriptionActive === false && (
+                                            <span className="text-xs font-bold bg-slate-900 text-white px-2.5 py-1 rounded-md shadow-sm border border-white/20 backdrop-blur-sm">
+                                                🚫 Hidden from Users (No Subscription)
                                             </span>
                                         )}
+                                        {(selectedVenue.venueTypes && selectedVenue.venueTypes.length > 0 ? selectedVenue.venueTypes : (selectedVenue.type ? [selectedVenue.type] : [])).map((t) => (
+                                            <span key={t} className="text-xs font-semibold bg-white/95 text-slate-700 px-2.5 py-1 rounded-md shadow-sm border border-white backdrop-blur-sm">
+                                                {t}
+                                            </span>
+                                        ))}
                                     </div>
                                     <h2 className="text-3xl font-bold text-white mb-1 shadow-sm">{selectedVenue.name}</h2>
                                     <p className="text-white/90 flex items-center gap-1.5 text-sm font-medium">

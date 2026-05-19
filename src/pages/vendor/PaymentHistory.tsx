@@ -74,13 +74,13 @@ const PaymentHistory = () => {
 
   const vendorId = localStorage.getItem("vendorId") || "";
 
-  const fetchHistory = useCallback(async () => {
+  const fetchHistory = useCallback(async (isRefresh = false) => {
     if (!vendorId) {
       toast.error("Vendor not authenticated");
       return;
     }
     try {
-      setLoading(true);
+      if (isRefresh) setLoading(true);
       const filters: PaymentHistoryFilters = {};
       if (typeFilter !== "all") filters.type = typeFilter;
       if (statusFilter !== "all") filters.paymentStatus = statusFilter;
@@ -95,6 +95,7 @@ const PaymentHistory = () => {
   }, [vendorId, typeFilter, statusFilter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchHistory();
   }, [fetchHistory]);
 
@@ -128,7 +129,7 @@ const PaymentHistory = () => {
         </div>
         <button
           id="refresh-history-btn"
-          onClick={fetchHistory}
+          onClick={() => fetchHistory(true)}
           className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#5C614D] border border-gray-200 hover:border-[#5C614D]/30 px-4 py-2 rounded-xl transition-all duration-200 bg-white shadow-sm"
         >
           <RefreshCw size={15} />

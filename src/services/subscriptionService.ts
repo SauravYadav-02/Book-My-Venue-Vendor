@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000";
+// const API_URL = "http://localhost:3000";
+const API_URL = "http://10.113.216.96:3000";
 
 // --- Types ---
 export interface Plan {
@@ -44,11 +45,12 @@ export interface SubscriptionQueueItem {
 }
 
 // --- Admin Services ---
-export const getAllPlansAdmin = async (adminId: string) => {
+export const getAllPlansAdmin = async (adminId: string, page = 1, limit = 10, search = "") => {
   const res = await axios.get(`${API_URL}/plans/all`, {
     headers: { adminid: adminId },
+    params: { page, limit, search }
   });
-  return res.data.plans;
+  return res.data; // returns { success, data, page, limit, totalRecords, totalPages }
 };
 
 export const createPlan = async (adminId: string, data: Partial<Plan>) => {

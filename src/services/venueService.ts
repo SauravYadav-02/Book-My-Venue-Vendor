@@ -2,7 +2,8 @@
 import axios, { AxiosError } from "axios";
 import type { VenueForm } from "../pages/vendor/AddVenue/types/Interface";
 
-const API_URL = "http://localhost:3000";
+// const API_URL = "http://localhost:3000";
+const API_URL = "http://10.113.216.96:3000";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -32,6 +33,8 @@ export interface Venue {
     lat?: number;   // 🔥 changed to number
     lng?: number;
 
+    venueTypes?: string[];
+    eventsSupported?: string[];
     amenities?: string[];
     availableFrom?: string;
 
@@ -43,6 +46,8 @@ export interface Venue {
 
     averageRating?: number;
     totalReviews?: number;
+
+    isSubscriptionActive?: boolean;
 
     createdAt?: string;
     updatedAt?: string;
@@ -91,8 +96,8 @@ const buildFormData = (form: VenueForm): FormData => {
     }
 
     Object.entries(form).forEach(([key, val]) => {
-        if (key === "amenities") {
-            formData.append(key, JSON.stringify(Array.from(form.amenities)));
+        if (key === "amenities" || key === "venueTypes" || key === "eventsSupported") {
+            formData.append(key, JSON.stringify(Array.from((form as any)[key])));
         } else if (key === "mediaFiles") {
             form.mediaFiles.forEach((file) =>
                 formData.append("mediaFiles", file)
@@ -130,10 +135,14 @@ export const createVenue = async (form: VenueForm): Promise<Venue> => {
 };
 
 // READ ALL
-export const getVenues = async (): Promise<Venue[]> => {
+export const getVenues = async (params = {}): Promise<any> => {
     try {
-        const response = await api.get<Venue[]>("/venues");
-        return response.data.map(normalizeVenue);
+        const response = await api.get<any>("/venues", { params });
+        // response.data will now be { data: Venue[], page, limit, totalRecords, totalPages }
+        if (response.data.data) {
+            response.data.data = response.data.data.map(normalizeVenue);
+        }
+        return response.data;
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
             console.error(
@@ -149,12 +158,15 @@ export const getVenues = async (): Promise<Venue[]> => {
 
 // READ VENDOR'S OWN VENUES
 // Passes ownerId so the backend skips subscription/status filters — vendor sees ALL their venues
-export const getVenuesByVendor = async (vendorId: string): Promise<Venue[]> => {
+export const getVenuesByVendor = async (vendorId: string, params: any = {}): Promise<any> => {
     try {
-        const response = await api.get<Venue[]>(`/venues/vendor/${vendorId}`, {
-            params: { ownerId: vendorId },
+        const response = await api.get<any>(`/venues/vendor/${vendorId}`, {
+            params: { ownerId: vendorId, ...params },
         });
-        return response.data.map(normalizeVenue);
+        if (response.data.data) {
+            response.data.data = response.data.data.map(normalizeVenue);
+        }
+        return response.data;
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
             console.error(
@@ -255,10 +267,13 @@ const handleError = (error: unknown): never => {
 // ✅ Service methods
 export const venueService = {
     // 🔹 Get all venues
-    getAll: async (): Promise<Venue[]> => {
+    getAll: async (params = {}): Promise<any> => {
         try {
-            const { data } = await api.get<Venue[]>("/venues");
-            return data.map(normalizeVenue);
+            const { data } = await api.get<any>("/venues", { params });
+            if (data.data) {
+                data.data = data.data.map(normalizeVenue);
+            }
+            return data;
         } catch (error) {
             return handleError(error); // 🔥 important
         }

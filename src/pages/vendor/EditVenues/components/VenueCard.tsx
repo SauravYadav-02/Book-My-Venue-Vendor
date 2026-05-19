@@ -35,7 +35,8 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
     const getImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-        const baseUrl = 'http://localhost:3000';
+        // const baseUrl = 'http://localhost:3000';
+        const baseUrl = 'http://10.113.216.96:3000';
         return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
     };
 
@@ -93,21 +94,36 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                     </svg>
                 )}
                 {/* Type badge */}
-                {venue.type && (
-                    <span className="absolute top-2.5 left-2.5 text-[11px] font-semibold bg-white/95 backdrop-blur-sm
-                        text-slate-700 px-2.5 py-1 rounded-md shadow-sm border border-white">
-                        {venue.type}
-                    </span>
-                )}
+                <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1 max-w-[70%] z-10">
+                    {(venue.venueTypes && venue.venueTypes.length > 0 ? venue.venueTypes : (venue.type ? [venue.type] : [])).slice(0, 2).map((t) => (
+                        <span key={t} className="text-[10px] font-semibold bg-white/95 backdrop-blur-sm
+                            text-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-white whitespace-nowrap">
+                            {t}
+                        </span>
+                    ))}
+                    {(venue.venueTypes && venue.venueTypes.length > 2) && (
+                        <span className="text-[9px] font-bold bg-white/95 backdrop-blur-sm
+                            text-slate-500 px-1.5 py-0.5 rounded-md shadow-sm border border-white whitespace-nowrap">
+                            +{venue.venueTypes.length - 2}
+                        </span>
+                    )}
+                </div>
                 {/* Status badge */}
-                {venue.status && (
-                    <span className={`absolute top-2.5 right-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm
-                        ${venue.status === 'approved' ? 'bg-emerald-500 text-white' :
-                            venue.status === 'rejected' ? 'bg-rose-500 text-white' :
-                                'bg-amber-400 text-white'} border border-white/20 backdrop-blur-sm`}>
-                        {venue.status.charAt(0).toUpperCase() + venue.status.slice(1)}
-                    </span>
-                )}
+                <div className="absolute top-2.5 right-2.5 flex flex-col items-end gap-1.5">
+                    {venue.status && (
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm
+                            ${venue.status === 'approved' ? 'bg-emerald-500 text-white' :
+                                venue.status === 'rejected' ? 'bg-rose-500 text-white' :
+                                    'bg-amber-400 text-white'} border border-white/20 backdrop-blur-sm`}>
+                            {venue.status.charAt(0).toUpperCase() + venue.status.slice(1)}
+                        </span>
+                    )}
+                    {venue.isSubscriptionActive === false && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-900/90 text-white border border-white/20 backdrop-blur-sm">
+                            🚫 Inactive (Subscription Expired)
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* Body */}

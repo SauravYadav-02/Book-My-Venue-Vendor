@@ -53,7 +53,7 @@ export default function VendorRegistrationForm() {
 
     const errors = validate(values);
 
-    const set = (id: keyof FormValues, val: any) => {
+    const set = (id: keyof FormValues, val: string | File | null) => {
         setValues(v => ({ ...v, [id]: val }));
     };
 

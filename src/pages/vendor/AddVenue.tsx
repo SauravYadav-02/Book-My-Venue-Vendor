@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { FormErrors, VenueForm } from "./AddVenue/types/Interface";
 import { INITIAL_FORM, STEPS } from "./AddVenue/types/Constants";
@@ -31,6 +31,7 @@ export default function AddVenue() {
   const [toast, setToast] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const update = (key: keyof VenueForm, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -47,6 +48,32 @@ export default function AddVenue() {
     });
   };
 
+  const toggleVenueType = (name: string) => {
+    setForm((prev) => {
+      const exists = prev.venueTypes.has(name);
+      const next = new Set(prev.venueTypes);
+      if (exists) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      const firstType = Array.from(next)[0] || "";
+      return { ...prev, venueTypes: next, type: firstType };
+    });
+  };
+
+  const toggleEventSupported = (name: string) => {
+    setForm((prev) => {
+      const exists = prev.eventsSupported.has(name);
+      const next = new Set(prev.eventsSupported);
+      if (exists) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return { ...prev, eventsSupported: next };
+    });
+  };
 
   const removeMedia = (index: number) => {
     setForm((prev) => ({
@@ -66,7 +93,8 @@ export default function AddVenue() {
     const errs: FormErrors = {};
     if (s === 0) {
       if (!form.name.trim()) errs.name = "Venue name is required";
-      if (!form.type) errs.type = "Please select a venue type";
+      if (!form.venueTypes || form.venueTypes.size === 0) errs.type = "Please select at least one venue category";
+      if (!form.eventsSupported || form.eventsSupported.size === 0) errs.eventsSupported = "Please select at least one supported event";
       if (!form.capacity || parseInt(form.capacity) < 1) errs.capacity = "Enter a valid capacity";
       if (!form.description.trim()) errs.description = "Description is required";
       if (!form.pricePerDay) errs.pricePerDay = "Enter daily pricing";
@@ -83,10 +111,12 @@ export default function AddVenue() {
   };
 
   const handleNext = async () => {
+    if (loading || isSubmittingRef.current) return;
     if (!validateStep(step)) return;
 
     if (step === STEPS.length - 1) {
       try {
+        isSubmittingRef.current = true;
         setLoading(true);
         const result = await createVenue(form);
         console.log("Venue created:", result);
@@ -94,6 +124,7 @@ export default function AddVenue() {
         setToast(true);
         setTimeout(() => setToast(false), 3500);
       } catch (error) {
+        isSubmittingRef.current = false;
         alert(`Failed to publish venue. Please try again.,${error}`);
       } finally {
         setLoading(false);
@@ -156,7 +187,15 @@ export default function AddVenue() {
         <Toast message="Venue published successfully!" show={toast} />
 
         <div className="flex-1 min-h-[400px]">
-          {step === 0 && <StepBasicInfo form={form} errors={errors} update={update} />}
+          {step === 0 && (
+            <StepBasicInfo
+              form={form}
+              errors={errors}
+              update={update}
+              toggleVenueType={toggleVenueType}
+              toggleEventSupported={toggleEventSupported}
+            />
+          )}
           {step === 1 && <StepLocation form={form} errors={errors} update={update} />}
           {step === 2 && (
             <StepAmenities form={form} updateAmenities={toggleAmenity} update={update} />

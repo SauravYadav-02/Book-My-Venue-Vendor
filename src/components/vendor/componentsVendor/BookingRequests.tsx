@@ -10,10 +10,6 @@ const BookingRequests = () => {
     const [requests, setRequests] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchBookings();
-    }, []);
-
     const fetchBookings = async () => {
         const vendorId = localStorage.getItem("vendorId");
         if (!vendorId) return;
@@ -27,6 +23,11 @@ const BookingRequests = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchBookings();
+    }, []);
 
     const handleReject = async (bookingId: string) => {
         try {

@@ -1,12 +1,24 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/bookings";
+// const BASE_URL = "http://localhost:3000/bookings";
+const BASE_URL = "http://10.113.216.96:3000/bookings";
 
 export interface Booking {
   _id: string;
-  userId: any;
-  vendorId: any;
-  venueId: any;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+  } | string;
+  vendorId: {
+    _id: string;
+    fullName: string;
+    businessName?: string;
+  } | string;
+  venueId: {
+    _id: string;
+    name: string;
+  } | string;
   date: string;
   cost: number;
   status: string;
@@ -59,7 +71,16 @@ export const getVendorBookings = async (vendorId: string): Promise<BookingRespon
 export const updateBookingStatus = async (
   bookingId: string,
   status: "approved" | "rejected"
-): Promise<any> => {
+): Promise<{ message: string; booking: Booking }> => {
   const res = await axios.put(`${BASE_URL}/${bookingId}/status`, { status });
   return res.data;
+};
+
+export const getAllBookingsAdmin = async (params = {}) => {
+  const token = localStorage.getItem("token") || "";
+  const res = await axios.get(`${BASE_URL}/`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params
+  });
+  return res.data; // returns { data, page, limit, totalRecords, totalPages }
 };

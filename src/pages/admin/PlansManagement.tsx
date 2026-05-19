@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function PlansManagement() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, totalRecords: 0, totalPages: 0 });
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Form State
   const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -16,23 +18,32 @@ export default function PlansManagement() {
 
   const adminId = localStorage.getItem("adminId") || "admin-mock-id";
 
-  const fetchPlans = useCallback(async () => {
+  const fetchPlans = useCallback(async (page = pagination.page, search = searchTerm) => {
     setLoading(true);
     try {
-      const data = await getAllPlansAdmin(adminId);
-      setPlans(data);
+      const response = await getAllPlansAdmin(adminId, page, pagination.limit, search);
+      setPlans(response.data);
+      setPagination({
+        page: response.page,
+        limit: response.limit,
+        totalRecords: response.totalRecords,
+        totalPages: response.totalPages
+      });
     } catch (error: unknown) {
       const err = error as { message?: string };
       toast.error("Failed to load plans " + (err?.message || String(error)));
     } finally {
       setLoading(false);
     }
-  }, [adminId]);
+  }, [adminId, pagination.limit]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchPlans();
-  }, [fetchPlans]);
+    fetchPlans(1, searchTerm);
+  }, [searchTerm, fetchPlans]);
+
+  useEffect(() => {
+    fetchPlans(pagination.page, searchTerm);
+  }, [pagination.page, fetchPlans]);
 
   const handleAddFeature = () => {
     if (!featureInput.trim()) return;
@@ -155,48 +166,84 @@ export default function PlansManagement() {
 
         {/* --- Plans List Section --- */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Search Bar */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search plans..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
           {loading ? (
             <p className="text-gray-500">Loading plans...</p>
           ) : plans.length === 0 ? (
             <p className="text-gray-500">No plans created yet.</p>
           ) : (
-            <AnimatePresence>
-              {plans.map((plan, index) => (
-                <motion.div 
-                  key={plan._id} 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between gap-4 ${plan.is_active ? 'bg-white shadow-sm' : 'bg-gray-50 opacity-75'}`}
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                      {plan.is_active ?
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">Active</span> :
-                        <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full font-medium">Inactive</span>
-                      }
+            <>
+              <AnimatePresence>
+                {plans.map((plan, index) => (
+                  <motion.div 
+                    key={plan._id} 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between gap-4 mb-4 ${plan.is_active ? 'bg-white shadow-sm' : 'bg-gray-50 opacity-75'}`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+                        {plan.is_active ?
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">Active</span> :
+                          <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full font-medium">Inactive</span>
+                        }
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{plan.duration_days} Days • {currencyFormatter.format(plan.price)}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {plan.features?.map((f, i) => (
+                          <span key={i} className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md">{f}</span>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{plan.duration_days} Days • {currencyFormatter.format(plan.price)}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {plan.features?.map((f, i) => (
-                        <span key={i} className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md">{f}</span>
-                      ))}
+    
+                    <div className="flex sm:flex-col justify-end gap-2 shrink-0">
+                      <button onClick={() => handleEditClick(plan)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Edit Plan">
+                        <Edit2 size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(plan._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Delete Plan">
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                  </div>
-  
-                  <div className="flex sm:flex-col justify-end gap-2 shrink-0">
-                    <button onClick={() => handleEditClick(plan)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Edit Plan">
-                      <Edit2 size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(plan._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Delete Plan">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Pagination Controls */}
+              {pagination.totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-6">
+                  <button
+                    disabled={pagination.page <= 1}
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    className="px-4 py-2 bg-white border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors shadow-sm"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm font-medium text-gray-600">
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+                  <button
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    className="px-4 py-2 bg-white border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors shadow-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

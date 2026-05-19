@@ -8,7 +8,7 @@ type Props = {
     values: FormValues;
     errors: Errors;
     touched: Touched;
-    set: (id: keyof FormValues, val: any) => void;
+    set: (id: keyof FormValues, val: string | File | null) => void;
     blur: (id: keyof FormValues) => void;
 };
 
@@ -38,7 +38,7 @@ export default function FormSection({
                     <InputField
                         key={field.id}
                         {...field}
-                        value={values[field.id] as any}
+                        value={values[field.id]}
                         error={errors[field.id]}
                         touched={touched[field.id]}
                         onChange={(val) => set(field.id, val)}

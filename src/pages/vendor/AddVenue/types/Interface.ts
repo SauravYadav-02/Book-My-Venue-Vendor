@@ -3,6 +3,8 @@
 export interface VenueForm {
     name: string;
     type: string;
+    venueTypes: Set<string>;
+    eventsSupported: Set<string>;
     capacity: string;
     description: string;
     pricePerDay: string;

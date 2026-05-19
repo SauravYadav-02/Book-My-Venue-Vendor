@@ -3,10 +3,10 @@ import type React from 'react';
 type Props = {
     label: string;
     icon: React.ElementType;
-    value: any;
+    value: string | File | null;
     error?: string;
     touched?: boolean;
-    onChange: (val: any) => void;
+    onChange: (val: string | File | null) => void;
     onBlur: () => void;
     type?: string;
     placeholder?: string;
@@ -53,7 +53,7 @@ export default function InputField({
 
                 {type === "select" ? (
                     <select
-                        value={value}
+                        value={value as string || ""}
                         onChange={(e) => onChange(e.target.value)}
                         onBlur={onBlur}
                         className={`${baseClass} appearance-none cursor-pointer`}
@@ -75,7 +75,7 @@ export default function InputField({
                 ) : (
                     <input
                         type={type}
-                        value={value as string}
+                        value={typeof value === "string" ? value : ""}
                         placeholder={placeholder || `Enter your ${label.toLowerCase()}`}
                         onChange={(e) => onChange(e.target.value)}
                         onBlur={onBlur}

@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000";
+// const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://10.113.216.96:3000";
 
 // ── Types matching the backend PaymentHistoryModel ───────────────────────────
 
@@ -84,10 +85,19 @@ export const getVendorPaymentHistory = async (
  * Fetch all payment history (admin only).
  */
 export const getAllPaymentHistory = async (
-  filters?: PaymentHistoryFilters
-): Promise<PaymentHistoryEntry[]> => {
-  const res = await axios.get<PaymentHistoryResponse>(`${BASE_URL}/payments`, {
-    params: filters,
+  params: any = {}
+): Promise<any> => {
+  const res = await axios.get<any>(`${BASE_URL}/payments`, {
+    params,
   });
-  return res.data.data;
+  return res.data; // returns { success, data, page, limit, totalRecords, totalPages }
+};
+
+/**
+ * GET /vendor/:vendorId/payments
+ * Fetch specific User-Vendor payments from the uservendorpayments collection.
+ */
+export const getUserVendorTransactions = async (vendorId: string): Promise<PaymentHistoryEntry[]> => {
+  const res = await axios.get(`${BASE_URL}/vendor/${vendorId}/payments`);
+  return res.data.payments;
 };

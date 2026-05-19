@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getVenueById, updateVenue } from "../../../services/venueService";
 import type { FormErrors, VenueForm } from "../AddVenue/types/Interface";
@@ -20,6 +20,7 @@ export default function EditVenue() {
     const [toast, setToast] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const isSubmittingRef = useRef(false);
     const [venueName, setVenueName] = useState("");
 
     useEffect(() => {
@@ -40,6 +41,8 @@ export default function EditVenue() {
                 setForm({
                     name: venue.name || "",
                     type: venue.type || "",
+                    venueTypes: new Set((venue as any).venueTypes || (venue.type ? [venue.type] : [])),
+                    eventsSupported: new Set((venue as any).eventsSupported || []),
                     capacity: venue.capacity ? String(venue.capacity) : "",
                     description: venue.description || "",
                     pricePerDay: venue.pricePerDay ? String(venue.pricePerDay) : "",
@@ -64,7 +67,7 @@ export default function EditVenue() {
             }
         };
         load();
-    }, [id]);
+    }, [id, navigate]);
 
     const update = (key: keyof VenueForm, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -81,6 +84,33 @@ export default function EditVenue() {
                 next.add(name);
             }
             return { ...prev, amenities: next };
+        });
+    };
+
+    const toggleVenueType = (name: string) => {
+        setForm((prev) => {
+            const exists = prev.venueTypes.has(name);
+            const next = new Set(prev.venueTypes);
+            if (exists) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            const firstType = Array.from(next)[0] || "";
+            return { ...prev, venueTypes: next, type: firstType };
+        });
+    };
+
+    const toggleEventSupported = (name: string) => {
+        setForm((prev) => {
+            const exists = prev.eventsSupported.has(name);
+            const next = new Set(prev.eventsSupported);
+            if (exists) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            return { ...prev, eventsSupported: next };
         });
     };
 
@@ -102,7 +132,8 @@ export default function EditVenue() {
         const errs: FormErrors = {};
         if (s === 0) {
             if (!form.name.trim()) errs.name = "Venue name is required";
-            if (!form.type) errs.type = "Please select a venue type";
+            if (!form.venueTypes || form.venueTypes.size === 0) errs.type = "Please select at least one venue category";
+            if (!form.eventsSupported || form.eventsSupported.size === 0) errs.eventsSupported = "Please select at least one supported event";
             if (!form.capacity || parseInt(form.capacity) < 1) errs.capacity = "Enter a valid capacity";
             if (!form.description.trim()) errs.description = "Description is required";
             if (!form.pricePerDay) errs.pricePerDay = "Enter daily pricing";
@@ -117,15 +148,18 @@ export default function EditVenue() {
     };
 
     const handleNext = async () => {
+        if (loading || isSubmittingRef.current) return;
         if (!validateStep(step)) return;
 
         if (step === STEPS.length - 1) {
             try {
+                isSubmittingRef.current = true;
                 setLoading(true);
                 await updateVenue(id!, form);
                 setToast(true);
                 setTimeout(() => navigate("/venues"), 2000);
             } catch {
+                isSubmittingRef.current = false;
                 alert("Failed to update venue. Please try again.");
             } finally {
                 setLoading(false);
@@ -191,7 +225,15 @@ export default function EditVenue() {
                 <Toast message="Venue updated successfully!" show={toast} />
 
                 <div className="flex-1 min-h-[400px]">
-                    {step === 0 && <StepBasicInfo form={form} errors={errors} update={update} />}
+                    {step === 0 && (
+                        <StepBasicInfo
+                            form={form}
+                            errors={errors}
+                            update={update}
+                            toggleVenueType={toggleVenueType}
+                            toggleEventSupported={toggleEventSupported}
+                        />
+                    )}
                     {step === 1 && <StepLocation form={form} errors={errors} update={update} />}
                     {step === 2 && <StepAmenities form={form} updateAmenities={toggleAmenity} update={update} />}
                     {step === 3 && <StepReview form={form} onAddMedia={addMedia} onRemoveMedia={removeMedia} />}

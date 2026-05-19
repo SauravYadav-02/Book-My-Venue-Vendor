@@ -33,7 +33,7 @@ export default function SubscriptionDashboard() {
     if (vendorId) {
       refreshData(vendorId);
     }
-  }, [vendorId]);
+  }, [vendorId, refreshData]);
 
   if (!vendorId) {
     return <div className="p-8 text-center text-red-500 font-medium">Authentication Error: Please log in to view your subscriptions.</div>;

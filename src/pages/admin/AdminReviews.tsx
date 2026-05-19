@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { differenceInDays } from "date-fns";
 import { Star, CheckCircle, XCircle, Clock } from "lucide-react";
@@ -19,36 +19,54 @@ interface Review {
 export default function AdminReviews() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, totalRecords: 0, totalPages: 0 });
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async (page = pagination.page, search = searchTerm) => {
+        setLoading(true);
         try {
-            // using admin token if exists, otherwise assume mock or global admin route
             const token = localStorage.getItem("token") || "";
-            const res = await axios.get("http://localhost:3000/admin/reviews", {
-                headers: { Authorization: `Bearer ${token}` }
+            const res = await axios.get("http://10.113.216.96:3000/admin/reviews", {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { page, limit: pagination.limit, search }
             });
-            setReviews(res.data);
-        } catch (error) {
+            setReviews(res.data.data);
+            setPagination({
+                page: res.data.page,
+                limit: res.data.limit,
+                totalRecords: res.data.totalRecords,
+                totalPages: res.data.totalPages
+            });
+        } catch {
             toast.error("Failed to fetch reviews");
         } finally {
             setLoading(false);
         }
-    };
+    }, [pagination.limit]);
 
     useEffect(() => {
-        fetchReviews();
-    }, []);
+        fetchReviews(1, searchTerm);
+    }, [searchTerm, fetchReviews]);
+
+    useEffect(() => {
+        fetchReviews(pagination.page, searchTerm);
+    }, [pagination.page, fetchReviews]);
 
     const updateStatus = async (venueId: string, reviewId: string, status: string) => {
         try {
             const token = localStorage.getItem("token") || "";
-            await axios.patch(`http://localhost:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
+            // await axios.patch(`http://localhost:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
+            await axios.patch(`http://10.113.216.96:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(`Review ${status} successfully`);
             fetchReviews();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to update review status");
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || "Failed to update review status");
+            } else {
+                toast.error("Failed to update review status");
+            }
         }
     };
 
@@ -59,6 +77,18 @@ export default function AdminReviews() {
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-6">
             <h1 className="text-2xl font-bold text-gray-800">Review Management</h1>
+            
+            {/* Search Bar */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search feedback..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full p-3 border rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white"
+                />
+            </div>
+
             <div className="grid gap-4">
                 {reviews.map((review) => {
                     const eligibleDate = new Date(review.reviewEligibleAt);
@@ -115,6 +145,29 @@ export default function AdminReviews() {
                     <div className="text-center py-12 text-gray-500">No reviews found.</div>
                 )}
             </div>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                    <button
+                        disabled={pagination.page <= 1}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                        className="px-4 py-2 bg-white border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-all shadow-sm font-medium"
+                    >
+                        Previous
+                    </button>
+                    <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
+                        Page {pagination.page} of {pagination.totalPages}
+                    </span>
+                    <button
+                        disabled={pagination.page >= pagination.totalPages}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        className="px-4 py-2 bg-white border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-all shadow-sm font-medium"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

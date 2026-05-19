@@ -1,26 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { getVenuesByVendor } from "../../services/venueService";
-import { getVendorReviews } from "../../services/ratingService";
+import { getVendorReviews, type Review, type VendorReviewsResponse } from "../../services/ratingService";
 import { Star, Filter, ArrowUpDown, ChevronLeft, ChevronRight, MessageSquareOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
-interface Review {
-    _id: string;
-    userId: { name: string; profilePhoto: string } | null;
-    venueId: { _id: string; name: string } | null;
-    rating: number;
-    feedback: string;
-    status: string;
-    createdAt: string;
-}
-
-interface Analytics {
-    averageRating: number;
-    totalReviews: number;
-    distribution: { [key: string]: number };
-}
+type Analytics = VendorReviewsResponse['analytics'];
 
 interface Venue {
     _id: string;
@@ -45,22 +31,25 @@ export default function VendorReviews() {
     const vendorId = localStorage.getItem("vendorId");
 
     useEffect(() => {
-        const fetchVenues = async () => {
+        let mounted = true;
+        const fetchVenuesData = async () => {
             try {
                 if (!vendorId) return;
                 const data = await getVenuesByVendor(vendorId);
-                // The service returns the venues, we map to the local Venue interface
-                setVenues(data.map(v => ({ _id: v._id, name: v.name })));
+                if (mounted) {
+                    setVenues(data.map(v => ({ _id: v._id, name: v.name })));
+                }
             } catch (error) {
                 console.error("Failed to fetch venues", error);
             }
         };
-        fetchVenues();
+        fetchVenuesData();
+        return () => { mounted = false; };
     }, [vendorId]);
 
-    const fetchReviewsData = useCallback(async () => {
+    const fetchReviewsData = useCallback(async (isRefresh = false) => {
         try {
-            setLoading(true);
+            if (isRefresh) setLoading(true);
             if (!vendorId) return;
 
             const data = await getVendorReviews(vendorId, {
@@ -85,6 +74,7 @@ export default function VendorReviews() {
     }, [vendorId, sort, selectedVenue, page]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchReviewsData();
     }, [fetchReviewsData]);
 

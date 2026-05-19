@@ -75,13 +75,12 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     // Check if vendor is already logged in and redirect them
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const vendorId = localStorage.getItem("vendorId");
         if (vendorId) {
             navigate("/dashboard", { replace: true });
         }
-    }, []); // intentionally empty — only runs once on mount
+    }, [navigate]); // runs on mount and whenever navigate changes
 
     const [form, setForm] = useState<LoginForm>({
         username: "",

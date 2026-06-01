@@ -33,7 +33,7 @@ export default function StepReview({
         if (!file) return '';
         if (file.startsWith('http://') || file.startsWith('https://') || file.startsWith('data:')) return file;
         // const baseUrl = 'http://localhost:3000';
-        const baseUrl = 'http://10.113.216.96:3000';
+        const baseUrl = 'http://localhost:3000';
         return file.startsWith('/') ? `${baseUrl}${file}` : `${baseUrl}/${file}`;
     };
 

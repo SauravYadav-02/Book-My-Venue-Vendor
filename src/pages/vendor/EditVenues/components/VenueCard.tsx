@@ -36,7 +36,7 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
         if (!url) return '';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
         // const baseUrl = 'http://localhost:3000';
-        const baseUrl = 'http://10.113.216.96:3000';
+        const baseUrl = 'http://localhost:3000';
         return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
     };
 

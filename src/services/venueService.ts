@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import type { VenueForm } from "../pages/vendor/AddVenue/types/Interface";
 
 // const API_URL = "http://localhost:3000";
-const API_URL = "http://10.113.216.96:3000";
+const API_URL = "http://localhost:3000";
 
 const api = axios.create({
     baseURL: API_URL,

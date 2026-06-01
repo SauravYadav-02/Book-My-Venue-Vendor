@@ -10,6 +10,7 @@ import VendorRegistrationForm from "./pages/auth/VendorRegistration/VendorRegist
 
 // Protected Route
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import PublicRoute from "./components/common/PublicRoute";
 
 // Vendor Venue Pages
 import AddVenue from "./pages/vendor/AddVenue";
@@ -21,16 +22,21 @@ import CalendarPage from "./pages/vendor/CalendarPage";
 import PaymentHistory from "./pages/vendor/PaymentHistory";
 
 import { SubscriptionProvider } from "./context/SubscriptionContext";
+import { VendorProvider } from "./context/VendorContext";
 import SubscriptionDashboard from "./pages/vendor/SubscriptionDashboard";
 import PlansManagement from "./pages/admin/PlansManagement";
 import VendorReviews from "./pages/vendor/VendorReviews";
 import AdminReviews from "./pages/admin/AdminReviews";
+import TermsPage from "./pages/vendor/Terms";
+
 
 // Wrapper to provide Subscription context to nested routes via Outlet
 const SubscriptionLayout = () => (
-  <SubscriptionProvider>
-    <Outlet />
-  </SubscriptionProvider>
+  <VendorProvider>
+    <SubscriptionProvider>
+      <Outlet />
+    </SubscriptionProvider>
+  </VendorProvider>
 );
 
 export default function App() {
@@ -38,8 +44,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public / Auth Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<VendorRegistrationForm />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<VendorRegistrationForm />} />
+        </Route>
         
         {/* Protected Vendor Routes */}
         <Route element={<ProtectedRoute />}>
@@ -60,8 +68,12 @@ export default function App() {
             {/* Subscription & Billing */}
             <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
 
-            {/* Payment History (new - backed by PaymentHistory collection) */}
+            {/* Payment History (existing - all types) */}
             <Route path="/payments" element={<Layout><PaymentHistory /></Layout>} />
+
+            {/* Terms & Conditions */}
+            <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+
 
             {/* Vendor Reviews */}
             <Route path="/reviews" element={<Layout><VendorReviews /></Layout>} />

@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Bell, Search, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Bell, Search, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVendor } from "../../context/VendorContext";
 
 const Navbar: React.FC = () => {
     const [showProfileInfo, setShowProfileInfo] = useState(false);
-    const navigate = useNavigate();
+    const { vendor, loading } = useVendor();
 
-    const handleLogout = () => {
-        localStorage.removeItem("vendorId");
-        navigate("/login");
-    };
+    const vendorName = loading ? "Loading..." : (vendor?.fullName || "Vendor Partner");
+    const businessName = loading ? "Please wait..." : (vendor?.businessName || "Owner");
 
     return (
         <header className="w-full bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 xl:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">
@@ -54,20 +52,11 @@ const Navbar: React.FC = () => {
                                 className="absolute top-12 right-0 bg-white shadow-lg border border-gray-100 p-4 rounded-xl z-50 w-48 text-left md:hidden"
                             >
                                 <span className="font-medium text-gray-800 leading-tight text-sm block">
-                                    Alexander Sterling
+                                    {vendorName}
                                 </span>
                                 <span className="text-gray-500 font-medium leading-tight mt-0.5 text-xs block">
-                                    Owner, Sterling Estates
+                                    {businessName}
                                 </span>
-                                
-                                {/* Logout Button (Mobile View Dropdown) */}
-                                <button 
-                                    onClick={handleLogout}
-                                    className="mt-3 flex items-center gap-2 text-red-500 font-medium text-sm hover:text-red-600 transition-colors w-full"
-                                >
-                                    <LogOut size={16} />
-                                    Logout
-                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -75,33 +64,22 @@ const Navbar: React.FC = () => {
                     {/* Text info (Desktop) */}
                     <div className="hidden md:flex flex-col text-right">
                         <span className="font-medium text-gray-800 leading-tight text-sm">
-                            Alexander Sterling
+                            {vendorName}
                         </span>
                         <span className="text-gray-500 font-medium leading-tight mt-0.5 text-xs">
-                            Owner, Sterling Estates
+                            {businessName}
                         </span>
                     </div>
 
-                    {/* Avatar */}
+                    {/* Empty Avatar Placeholder */}
                     <button
                         onClick={() => setShowProfileInfo((prev) => !prev)}
                         className="focus:outline-none shrink-0"
                         aria-label="Toggle profile info"
                     >
-                        <img
-                            src="https://i.pravatar.cc/40"
-                            alt="Alexander Sterling"
-                            className="rounded-full object-cover ring-2 ring-transparent hover:ring-primary-light transition-all duration-200 w-9 h-9 sm:w-10 sm:h-10 cursor-pointer"
-                        />
-                    </button>
-
-                    {/* Desktop Logout Button */}
-                    <button 
-                        onClick={handleLogout}
-                        title="Logout"
-                        className="hidden md:flex p-2 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors duration-150 ml-2"
-                    >
-                        <LogOut size={20} />
+                        <div className="rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 flex items-center justify-center transition-all duration-200 w-9 h-9 sm:w-10 sm:h-10 cursor-pointer text-gray-500 hover:text-primary-light">
+                            <User size={18} />
+                        </div>
                     </button>
                 </div>
             </div>

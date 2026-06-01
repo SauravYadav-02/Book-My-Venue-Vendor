@@ -6,7 +6,6 @@ import {
     ClipboardList,
     CalendarDays,
     Calendar,
-    BarChart3,
     Settings,
     Plus,
     HelpCircle,
@@ -15,24 +14,32 @@ import {
     X,
     Package,
     Star,
-    History
+    History,
+    CreditCard,
+    FileText
 } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useSubscription } from "../../context/SubscriptionContext";
+import { useVendor } from "../../context/VendorContext";
 import toast from "react-hot-toast";
 
 // ─── Nav Config ───────────────────────────────────────────────────────────────
 const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+
     { label: "Listings", path: "/venue", icon: ClipboardList },
     { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
     { label: "Calendar", path: "/calendar", icon: Calendar },
-    { label: "Analytics", path: "/analytics", icon: BarChart3 },
+
     { label: "Reviews", path: "/reviews", icon: Star },
     { label: "Billing", path: "/billing", icon: Package },
     { label: "Payments", path: "/payments", icon: History },
+    { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
+    { label: "Terms & Conditions", path: "/terms", icon: FileText },
     { label: "Settings", path: "/settings", icon: Settings },
 ];
+
 
 // ─── Sidebar Item ─────────────────────────────────────────────────────────────
 const SidebarItem = ({
@@ -73,15 +80,15 @@ const SidebarItem = ({
                 transition-all duration-200 border-none cursor-pointer
                 ${collapsed ? "justify-center" : ""}
                 ${isActive
-                    ? "bg-primary-bg text-primary-light"
-                    : "bg-transparent text-gray-500 hover:bg-gray-50 hover:text-primary-light"
+                    ? "bg-brand-bg text-brand-light"
+                    : "bg-transparent text-gray-500 hover:bg-gray-50 hover:text-brand-light"
                 }
             `}
         >
             {/* Active / hover left indicator */}
             <span
                 className={`
-                    absolute left-0 w-1 rounded-r-md bg-primary-light
+                    absolute left-0 w-1 rounded-r-md bg-brand-light
                     transition-all duration-200 h-[60%]
                     ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
                 `}
@@ -90,7 +97,7 @@ const SidebarItem = ({
             {/* Icon */}
             <Icon
                 className={`shrink-0 transition-colors duration-200
-                    ${isActive ? "text-primary-light" : "text-gray-400 group-hover:text-primary-light"}
+                    ${isActive ? "text-brand-light" : "text-gray-400 group-hover:text-brand-light"}
                 `}
                 size={18}
             />
@@ -102,7 +109,7 @@ const SidebarItem = ({
                     {badge && (
                         <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full leading-none
-                                ${isActive ? "bg-primary-light text-white" : "bg-red-500 text-white"}
+                                ${isActive ? "bg-brand-light text-white" : "bg-red-500 text-white"}
                             `}
                         >
                             {badge}
@@ -118,6 +125,9 @@ const SidebarItem = ({
 const Sidebar = () => {
     const navigate = useNavigate();
     const { currentSubscription } = useSubscription();
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const { vendor } = useVendor();
+    const vendorName = vendor?.fullName || localStorage.getItem("username") || "Vendor Partner";
     
     const [active, setActive] = useState(() => {
         const path = window.location.pathname.slice(1).toLowerCase();
@@ -130,7 +140,7 @@ const Sidebar = () => {
     const sidebarContent = (isMobile = false) => (
         <>
             {/* ── Top accent strip ── */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-r-sm bg-gradient-to-b from-primary-light to-green-300 opacity-80" />
+            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-r-sm bg-gradient-to-b from-brand-light to-green-300 opacity-80" />
 
             {/* ── Brand ─────────────────────────────────────────────────────── */}
             <div className={`flex items-center border-b border-gray-100 px-4 py-5 h-[73px]
@@ -138,7 +148,7 @@ const Sidebar = () => {
 
                 {(!collapsed || isMobile) && (
                     <div>
-                        <h1 className="text-base font-bold text-primary tracking-tight leading-tight">
+                        <h1 className="text-base font-bold text-brand-primary tracking-tight leading-tight">
                             BookMyVenue
                         </h1>
                         <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
@@ -152,7 +162,7 @@ const Sidebar = () => {
                     {!isMobile && (
                         <button
                             onClick={() => setCollapsed(!collapsed)}
-                            className="hidden md:flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-primary-light transition-colors"
+                            className="hidden md:flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-brand-light transition-colors"
                             aria-label="Toggle sidebar"
                         >
                             <Menu size={18} />
@@ -205,7 +215,7 @@ const Sidebar = () => {
                         if (isMobile) setOpen(false);
                     }}
                     className={`
-                        w-full flex items-center gap-2 bg-primary hover:bg-primary-light
+                        w-full flex items-center gap-2 bg-brand-primary hover:bg-brand-light
                         text-white rounded-xl font-medium shadow-sm hover:shadow-md
                         transition-all duration-200 border-none cursor-pointer text-sm
                         ${collapsed && !isMobile ? "justify-center p-3" : "justify-center px-4 py-3 mb-4"}
@@ -222,7 +232,7 @@ const Sidebar = () => {
                 <button
                     className={`
                         group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                        text-gray-500 hover:bg-gray-50 hover:text-primary transition-all duration-200 border-none cursor-pointer bg-transparent
+                        text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all duration-200 border-none cursor-pointer bg-transparent
                         ${collapsed && !isMobile ? "justify-center" : ""}
                     `}
                     title={collapsed && !isMobile ? "Help Center" : undefined}
@@ -233,10 +243,7 @@ const Sidebar = () => {
 
                 {/* Logout */}
                 <button
-                    onClick={() => {
-                        localStorage.clear();
-                        navigate("/login");
-                    }}
+                    onClick={() => setShowLogoutConfirm(true)}
                     className={`
                         group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mt-1 text-sm font-medium
                         text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all duration-200 border-none cursor-pointer bg-transparent
@@ -305,6 +312,60 @@ const Sidebar = () => {
             >
                 <Menu size={20} />
             </button>
+
+            {/* ══ LOGOUT CONFIRMATION MODAL ══════════════════════════════════ */}
+            <AnimatePresence>
+                {showLogoutConfirm && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"
+                            onClick={() => setShowLogoutConfirm(false)}
+                        />
+
+                        {/* Modal Box */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="bg-white rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 text-center"
+                        >
+                            <div className="mx-auto w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+                                <LogOut size={22} />
+                            </div>
+                            
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">
+                                Confirm Logout
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                                Are you sure you want to log out, <span className="font-semibold text-gray-800">{vendorName}</span>?
+                            </p>
+
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setShowLogoutConfirm(false)}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors flex-1 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        localStorage.clear();
+                                        navigate("/login");
+                                    }}
+                                    className="px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 shadow-md hover:shadow-red-500/20 transition-all flex-1 cursor-pointer border-none"
+                                >
+                                    Yes, Logout
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </>
     );
 };

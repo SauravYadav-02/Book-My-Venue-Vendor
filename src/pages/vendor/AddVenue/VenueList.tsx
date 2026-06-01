@@ -252,7 +252,7 @@ export default function VenueList() {
                                 {selectedVenue.mediaFiles && selectedVenue.mediaFiles.length > 0 ? (
                                     <>
                                         <img
-                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : /* `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}` */ `http://10.113.216.96:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
+                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : /* `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}` */ `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
                                             alt={`${selectedVenue.name} - image ${currentImageIndex + 1}`}
                                             className="w-full h-full object-cover"
                                         />

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const API_URL = "http://localhost:3000";
-const API_URL = "http://10.113.216.96:3000";
+const API_URL = "http://localhost:3000";
 
 // --- Types ---
 export interface Plan {

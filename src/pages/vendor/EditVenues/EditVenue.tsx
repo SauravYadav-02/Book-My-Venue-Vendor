@@ -9,10 +9,22 @@ import StepBasicInfo from "../AddVenue/components/StepBasicInfo";
 import StepLocation from "../AddVenue/components/StepLocation";
 import StepAmenities from "../AddVenue/components/StepAmenities";
 import StepReview from "../AddVenue/components/StepReview";
+import { useSubscription } from "../../../context/SubscriptionContext";
 
 export default function EditVenue() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { currentSubscription, loading: subLoading } = useSubscription();
+
+    useEffect(() => {
+        if (!subLoading) {
+            const status = String(currentSubscription?.status || "").toUpperCase();
+            if (!currentSubscription || (status !== "ACTIVE" && status !== "active")) {
+                alert("You need an active subscription to manage venues.");
+                navigate("/billing");
+            }
+        }
+    }, [currentSubscription, subLoading, navigate]);
 
     const [step, setStep] = useState(0);
     const [form, setForm] = useState<VenueForm>({ ...INITIAL_FORM, amenities: new Set() });

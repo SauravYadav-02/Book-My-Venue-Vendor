@@ -111,3 +111,21 @@ export const getSubscriptionQueue = async (vendorId: string) => {
   });
   return res.data.queue;
 };
+
+export interface AddonSubscription {
+  _id: string;
+  userId: string;
+  addonId: Plan;
+  baseSubscriptionId: any;
+  status: "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
+  startDate: string;
+  expiryDate: string;
+  suspensionReason?: string | null;
+}
+
+export const getMyAddons = async (vendorId: string): Promise<AddonSubscription[]> => {
+  const res = await axios.get(`${API_URL}/subscription/addons`, {
+    headers: { vendorid: vendorId },
+  });
+  return res.data.addons;
+};

@@ -8,12 +8,15 @@ import {
   type Plan,
   type Subscription,
   type SubscriptionQueueItem,
+  type AddonSubscription,
+  getMyAddons,
 } from "../services/subscriptionService";
 import toast from "react-hot-toast";
 
 interface SubscriptionContextType {
   availablePlans: Plan[];
   currentSubscription: Subscription | null;
+  addons: AddonSubscription[];
   queue: SubscriptionQueueItem[];
   loading: boolean;
   refreshData: (vendorId: string) => Promise<void>;
@@ -26,6 +29,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
+  const [addons, setAddons] = useState<AddonSubscription[]>([]);
   const [queue, setQueue] = useState<SubscriptionQueueItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -33,15 +37,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const refreshData = useCallback(async (vendorId: string) => {
     setLoading(true);
     try {
-      const [plansRes, subRes, queueRes] = await Promise.allSettled([
+      const [plansRes, subRes, queueRes, addonsRes] = await Promise.allSettled([
         getActivePlans(),
         getCurrentSubscription(vendorId),
         getSubscriptionQueue(vendorId),
+        getMyAddons(vendorId),
       ]);
 
       if (plansRes.status === "fulfilled") setAvailablePlans(plansRes.value);
       if (subRes.status === "fulfilled") setCurrentSubscription(subRes.value);
       if (queueRes.status === "fulfilled") setQueue(queueRes.value);
+      if (addonsRes.status === "fulfilled") setAddons(addonsRes.value);
     } catch (error) {
       console.error("Error fetching subscription data", error);
     } finally {
@@ -84,7 +90,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   return (
     <SubscriptionContext.Provider
-      value={{ availablePlans, currentSubscription, queue, loading, refreshData, createPayment, confirmSubscription }}
+      value={{ availablePlans, currentSubscription, addons, queue, loading, refreshData, createPayment, confirmSubscription }}
     >
       {children}
     </SubscriptionContext.Provider>

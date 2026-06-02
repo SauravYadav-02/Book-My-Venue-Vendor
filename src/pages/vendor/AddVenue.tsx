@@ -19,9 +19,12 @@ export default function AddVenue() {
   const { currentSubscription, loading: subLoading } = useSubscription();
 
   useEffect(() => {
-    if (!subLoading && (!currentSubscription || currentSubscription.status === "expired")) {
-      toastNotification.error("You need an active subscription to add venues.");
-      navigate("/billing");
+    if (!subLoading) {
+      const status = String(currentSubscription?.status || "").toUpperCase();
+      if (!currentSubscription || (status !== "ACTIVE" && status !== "active")) {
+        toastNotification.error("You need an active subscription to add venues.");
+        navigate("/billing");
+      }
     }
   }, [currentSubscription, subLoading, navigate]);
 

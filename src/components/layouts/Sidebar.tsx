@@ -27,12 +27,11 @@ import toast from "react-hot-toast";
 // ─── Nav Config ───────────────────────────────────────────────────────────────
 const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-
     { label: "Listings", path: "/venue", icon: ClipboardList },
     { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
     { label: "Calendar", path: "/calendar", icon: Calendar },
-
     { label: "Reviews", path: "/reviews", icon: Star },
+    { label: "Complaints", path: "/complaints", icon: HelpCircle },
     { label: "Billing", path: "/billing", icon: Package },
     { label: "Payments", path: "/payments", icon: History },
     { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
@@ -129,9 +128,30 @@ const Sidebar = () => {
     const { vendor } = useVendor();
     const vendorName = vendor?.fullName || localStorage.getItem("username") || "Vendor Partner";
     
+    const isAdminUser = !!localStorage.getItem("adminId");
+    const itemsToShow = isAdminUser ? [
+        { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+        { label: "Plans", path: "/admin/plans", icon: Package },
+        { label: "Reviews", path: "/admin/reviews", icon: Star },
+        { label: "Complaints", path: "/admin/complaints", icon: HelpCircle },
+        { label: "Settings", path: "/settings", icon: Settings },
+    ] : [
+        { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+        { label: "Listings", path: "/venue", icon: ClipboardList },
+        { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
+        { label: "Calendar", path: "/calendar", icon: Calendar },
+        { label: "Reviews", path: "/reviews", icon: Star },
+        { label: "Complaints", path: "/complaints", icon: HelpCircle },
+        { label: "Billing", path: "/billing", icon: Package },
+        { label: "Payments", path: "/payments", icon: History },
+        { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
+        { label: "Terms & Conditions", path: "/terms", icon: FileText },
+        { label: "Settings", path: "/settings", icon: Settings },
+    ];
+
     const [active, setActive] = useState(() => {
-        const path = window.location.pathname.slice(1).toLowerCase();
-        const matched = navItems.find(item => item.label.toLowerCase() === path);
+        const path = window.location.pathname.toLowerCase();
+        const matched = itemsToShow.find(item => path.includes(item.path.toLowerCase()));
         return matched ? matched.label : "Dashboard";
     });
     const [open, setOpen] = useState(false);   // mobile drawer
@@ -152,7 +172,7 @@ const Sidebar = () => {
                             BookMyVenue
                         </h1>
                         <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
-                            Management
+                            {isAdminUser ? "Admin Area" : "Management"}
                         </p>
                     </div>
                 )}
@@ -184,7 +204,7 @@ const Sidebar = () => {
 
             {/* ── Navigation ────────────────────────────────────────────────── */}
             <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
-                {navItems.map((item) => (
+                {itemsToShow.map((item) => (
                     <SidebarItem
                         key={item.label}
                         label={item.label}

@@ -26,7 +26,9 @@ import { VendorProvider } from "./context/VendorContext";
 import SubscriptionDashboard from "./pages/vendor/SubscriptionDashboard";
 import PlansManagement from "./pages/admin/PlansManagement";
 import VendorReviews from "./pages/vendor/VendorReviews";
+import VendorComplaints from "./pages/vendor/VendorComplaints";
 import AdminReviews from "./pages/admin/AdminReviews";
+import AdminComplaints from "./pages/admin/AdminComplaints";
 import TermsPage from "./pages/vendor/Terms";
 
 
@@ -78,9 +80,13 @@ export default function App() {
             {/* Vendor Reviews */}
             <Route path="/reviews" element={<Layout><VendorReviews /></Layout>} />
 
+            {/* Vendor Complaints */}
+            <Route path="/complaints" element={<Layout><VendorComplaints /></Layout>} />
+
             {/* Admin Routes */}
             <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />
             <Route path="/admin/reviews" element={<Layout><AdminReviews /></Layout>} />
+            <Route path="/admin/complaints" element={<Layout><AdminComplaints /></Layout>} />
           </Route>
         </Route>
 

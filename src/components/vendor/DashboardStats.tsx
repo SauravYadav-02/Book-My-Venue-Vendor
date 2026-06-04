@@ -1,8 +1,27 @@
+import React, { useState, useEffect } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
-import { DollarSign, Building, CalendarCheck, CreditCard } from "lucide-react";
+import { DollarSign, Building, CalendarCheck, CreditCard, AlertCircle } from "lucide-react";
+import { getComplaintsList } from "../../services/complaintService";
+import { useNavigate } from "react-router-dom";
 
 const DashBoardCard = () => {
+    const navigate = useNavigate();
     const { currentSubscription, loading } = useSubscription();
+    const [activeComplaintsCount, setActiveComplaintsCount] = useState<number>(0);
+
+    useEffect(() => {
+        const vendorId = localStorage.getItem("vendorId");
+        if (vendorId) {
+            getComplaintsList({ vendorid: vendorId })
+                .then((list) => {
+                    const activeCount = list.filter(
+                        (c) => c.status === "Open" || c.status === "In Progress"
+                    ).length;
+                    setActiveComplaintsCount(activeCount);
+                })
+                .catch(console.error);
+        }
+    }, []);
 
     // format date helper
     const formatDate = (dateStr?: string) => {
@@ -69,6 +88,7 @@ const DashBoardCard = () => {
             Icon: DollarSign,
             borderColor: "border-green-100",
             bgColor: "bg-green-50",
+            path: null
         },
         {
             id: 2,
@@ -79,6 +99,7 @@ const DashBoardCard = () => {
             Icon: Building,
             borderColor: "border-blue-100",
             bgColor: "bg-blue-50",
+            path: "/venue"
         },
         {
             id: 3,
@@ -89,15 +110,28 @@ const DashBoardCard = () => {
             Icon: CalendarCheck,
             borderColor: "border-red-100",
             bgColor: "bg-red-50",
+            path: "/booking"
         },
+        {
+            id: 4,
+            title: "ACTIVE COMPLAINTS",
+            value: String(activeComplaintsCount),
+            subtext: activeComplaintsCount > 0 ? "Requires resolution chat" : "No issues pending",
+            subtextColor: activeComplaintsCount > 0 ? "text-red-600 font-semibold" : "text-green-600",
+            Icon: AlertCircle,
+            borderColor: activeComplaintsCount > 0 ? "border-red-200" : "border-gray-200",
+            bgColor: activeComplaintsCount > 0 ? "bg-red-50/50" : "bg-gray-50",
+            path: "/complaints"
+        }
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
-            {cardData.map(({ id, title, value, subtext, subtextColor, Icon, borderColor, bgColor }) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 w-full">
+            {cardData.map(({ id, title, value, subtext, subtextColor, Icon, borderColor, bgColor, path }) => (
                 <div
                     key={id}
-                    className={`border rounded-xl p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between`}
+                    onClick={() => path && navigate(path)}
+                    className={`border rounded-xl p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between ${path ? "cursor-pointer hover:shadow-md transition-all active:scale-[0.99]" : ""}`}
                 >
                     <div>
                         <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getActiveTerms } from "../../services/termsService";
 import { Loader2 } from "lucide-react";
 
@@ -17,7 +17,7 @@ const Terms = () => {
         } else {
           setError(data.message || "Failed to load terms.");
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err?.message || "Unexpected error while fetching terms.");
       } finally {
         setLoading(false);
@@ -44,9 +44,13 @@ const Terms = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <h1 className="text-3xl font-semibold mb-6 text-center">Terms & Conditions</h1>
-      <div className="prose prose-sm sm:prose lg:max-w-none" dangerouslySetInnerHTML={{ __html: terms }} />
+    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm">
+        <h1 className="text-3xl font-extrabold mb-8 text-[#2d2d2d] tracking-tight border-b border-gray-100 pb-5">
+          Terms & Conditions
+        </h1>
+        <div className="terms-content" dangerouslySetInnerHTML={{ __html: terms }} />
+      </div>
     </div>
   );
 };

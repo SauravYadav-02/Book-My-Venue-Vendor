@@ -53,6 +53,56 @@ body {
   .animate-step-in {
     animation: stepIn 0.35s ease both;
   }
+
+  /* Custom styling for dynamically loaded terms HTML */
+  .terms-content h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .terms-content h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d2d2d;
+    margin-top: 1.25rem;
+    margin-bottom: 0.6rem;
+  }
+  .terms-content h3 {
+    font-size: 1.125rem;
+    font-weight: 550;
+    color: #2d2d2d;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .terms-content p {
+    color: #4a4a4a;
+    line-height: 1.625;
+    margin-bottom: 1rem;
+  }
+  .terms-content ul {
+    list-style-type: disc;
+    list-style-position: inside;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    color: #4a4a4a;
+  }
+  .terms-content ol {
+    list-style-type: decimal;
+    list-style-position: inside;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    color: #4a4a4a;
+  }
+  .terms-content li {
+    line-height: 1.625;
+    margin-bottom: 0.25rem;
+  }
+  .terms-content strong {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
 }
 
 @keyframes stepIn {

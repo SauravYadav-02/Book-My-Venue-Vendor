@@ -119,8 +119,8 @@ const CalendarPage = () => {
                             
                             <div className="mt-2 space-y-1">
                                 {dayBookings.map((b, i) => (
-                                    <div key={i} className="text-[10px] px-1.5 py-1 bg-red-100 text-red-700 rounded truncate" title={`${b.venueId?.name} booked by ${b.userId?.name}`}>
-                                        {b.venueId?.name}
+                                    <div key={i} className="text-[10px] px-1.5 py-1 bg-red-100 text-red-700 rounded truncate" title={`${(b.venueId as any)?.name} booked by ${(b.userId as any)?.name}`}>
+                                        {(b.venueId as any)?.name}
                                     </div>
                                 ))}
                             </div>
@@ -171,7 +171,7 @@ const CalendarPage = () => {
                                         <div key={b._id || idx} className="border border-gray-100 rounded-xl p-5 hover:border-gray-200 hover:shadow-sm transition-all bg-white">
                                             <div className="flex justify-between items-start mb-4">
                                                 <div>
-                                                    <h3 className="text-lg font-bold text-gray-900">{b.venueId?.name || "Unknown Venue"}</h3>
+                                                    <h3 className="text-lg font-bold text-gray-900">{(b.venueId as any)?.name || "Unknown Venue"}</h3>
                                                     <p className={`text-sm font-medium inline-flex px-2 py-0.5 rounded mt-1 ${
                                                         b.status === "approved" ? "text-emerald-600 bg-emerald-50" :
                                                         b.status === "success"  ? "text-blue-600 bg-blue-50" :
@@ -193,8 +193,8 @@ const CalendarPage = () => {
                                                     </div>
                                                     <div>
                                                         <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-0.5">Customer</p>
-                                                        <p className="text-sm font-semibold text-gray-800">{b.userId?.name || "N/A"}</p>
-                                                        <p className="text-xs text-gray-500">{b.userId?.email || "No email provided"}</p>
+                                                        <p className="text-sm font-semibold text-gray-800">{(b.userId as any)?.name || "N/A"}</p>
+                                                        <p className="text-xs text-gray-500">{(b.userId as any)?.email || "No email provided"}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3 items-start">

@@ -16,7 +16,8 @@ import {
     Star,
     History,
     CreditCard,
-    FileText
+    FileText,
+    AlertCircle
 } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,20 +25,6 @@ import { useSubscription } from "../../context/SubscriptionContext";
 import { useVendor } from "../../context/VendorContext";
 import toast from "react-hot-toast";
 
-// ─── Nav Config ───────────────────────────────────────────────────────────────
-const navItems = [
-    { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Listings", path: "/venue", icon: ClipboardList },
-    { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
-    { label: "Calendar", path: "/calendar", icon: Calendar },
-    { label: "Reviews", path: "/reviews", icon: Star },
-    { label: "Complaints", path: "/complaints", icon: HelpCircle },
-    { label: "Billing", path: "/billing", icon: Package },
-    { label: "Payments", path: "/payments", icon: History },
-    { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
-    { label: "Terms & Conditions", path: "/terms", icon: FileText },
-    { label: "Settings", path: "/settings", icon: Settings },
-];
 
 
 // ─── Sidebar Item ─────────────────────────────────────────────────────────────
@@ -134,6 +121,7 @@ const Sidebar = () => {
         { label: "Plans", path: "/admin/plans", icon: Package },
         { label: "Reviews", path: "/admin/reviews", icon: Star },
         { label: "Complaints", path: "/admin/complaints", icon: HelpCircle },
+        { label: "Reports", path: "/admin/reports", icon: AlertCircle },
         { label: "Settings", path: "/settings", icon: Settings },
     ] : [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },

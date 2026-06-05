@@ -29,6 +29,7 @@ import VendorReviews from "./pages/vendor/VendorReviews";
 import VendorComplaints from "./pages/vendor/VendorComplaints";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminComplaints from "./pages/admin/AdminComplaints";
+import AdminReports from "./pages/admin/AdminReports";
 import TermsPage from "./pages/vendor/Terms";
 
 
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />
             <Route path="/admin/reviews" element={<Layout><AdminReviews /></Layout>} />
             <Route path="/admin/complaints" element={<Layout><AdminComplaints /></Layout>} />
+            <Route path="/admin/reports" element={<Layout><AdminReports /></Layout>} />
           </Route>
         </Route>
 

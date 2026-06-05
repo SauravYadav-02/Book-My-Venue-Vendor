@@ -158,6 +158,8 @@ export default function AdminComplaints() {
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "Closed":
         return "bg-stone-100 text-stone-600 border-stone-200";
+      case "Rejected":
+        return "bg-rose-50 text-rose-700 border-rose-200";
       default:
         return "bg-gray-50 text-gray-600 border-gray-200";
     }
@@ -192,6 +194,7 @@ export default function AdminComplaints() {
             <option value="In Progress">In Progress</option>
             <option value="Resolved">Resolved</option>
             <option value="Closed">Closed</option>
+            <option value="Rejected">Rejected</option>
           </select>
         </div>
       </div>
@@ -268,6 +271,7 @@ export default function AdminComplaints() {
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                     <option value="Closed">Closed</option>
+                    <option value="Rejected">Rejected</option>
                   </select>
                   <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
                 </div>

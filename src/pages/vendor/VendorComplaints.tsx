@@ -12,8 +12,6 @@ import toast, { Toaster } from "react-hot-toast";
 import {
   MessageSquare,
   Send,
-  Clock,
-  CheckCircle,
   AlertCircle,
   FileText,
   User,
@@ -129,6 +127,8 @@ export default function VendorComplaints() {
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "Closed":
         return "bg-stone-100 text-stone-600 border-stone-200";
+      case "Rejected":
+        return "bg-rose-50 text-rose-700 border-rose-200";
       default:
         return "bg-gray-50 text-gray-600 border-gray-200";
     }
@@ -208,7 +208,7 @@ export default function VendorComplaints() {
                 <div className="relative inline-block">
                   <select
                     value={selectedComplaint.status}
-                    disabled={updatingStatus}
+                    disabled={updatingStatus || selectedComplaint.status === "Rejected"}
                     onChange={(e) => handleStatusChange(e.target.value)}
                     className={`text-xs font-bold uppercase tracking-wider pl-3 pr-8 py-1.5 rounded-full border bg-white outline-none cursor-pointer appearance-none transition-all ${getStatusBadgeClass(selectedComplaint.status)}`}
                   >
@@ -216,6 +216,9 @@ export default function VendorComplaints() {
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                     <option value="Closed">Closed</option>
+                    {selectedComplaint.status === "Rejected" && (
+                      <option value="Rejected" disabled>Rejected</option>
+                    )}
                   </select>
                   <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
                 </div>
@@ -311,12 +314,12 @@ export default function VendorComplaints() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your reply to customer..."
-                    disabled={selectedComplaint.status === "Closed"}
+                    disabled={selectedComplaint.status === "Closed" || selectedComplaint.status === "Rejected"}
                     className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 outline-none text-sm text-stone-800 placeholder:text-stone-400 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 disabled:bg-stone-50 disabled:cursor-not-allowed transition-all"
                   />
                   <button
                     type="submit"
-                    disabled={!newMessage.trim() || selectedComplaint.status === "Closed"}
+                    disabled={!newMessage.trim() || selectedComplaint.status === "Closed" || selectedComplaint.status === "Rejected"}
                     className="bg-stone-800 hover:bg-stone-900 disabled:bg-stone-200 disabled:cursor-not-allowed text-white p-2.5 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-95"
                   >
                     <Send size={16} />
@@ -325,6 +328,11 @@ export default function VendorComplaints() {
                 {selectedComplaint.status === "Closed" && (
                   <p className="text-[10px] text-amber-600 font-semibold mt-1 flex items-center gap-1">
                     <AlertCircle size={10} /> This complaint has been closed. Replying is disabled.
+                  </p>
+                )}
+                {selectedComplaint.status === "Rejected" && (
+                  <p className="text-[10px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                    <AlertCircle size={10} /> This complaint has been rejected by Admin. Replying is disabled.
                   </p>
                 )}
               </div>

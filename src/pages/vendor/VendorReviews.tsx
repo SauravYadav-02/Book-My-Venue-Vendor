@@ -37,7 +37,7 @@ export default function VendorReviews() {
                 if (!vendorId) return;
                 const data = await getVenuesByVendor(vendorId);
                 if (mounted) {
-                    setVenues(data.map(v => ({ _id: v._id, name: v.name })));
+                    setVenues(data.map((v: any) => ({ _id: v._id, name: v.name })));
                 }
             } catch (error) {
                 console.error("Failed to fetch venues", error);

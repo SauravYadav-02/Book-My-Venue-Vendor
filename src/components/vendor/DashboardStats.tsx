@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
 import { DollarSign, Building, CalendarCheck, CreditCard, AlertCircle } from "lucide-react";
 import { getComplaintsList } from "../../services/complaintService";

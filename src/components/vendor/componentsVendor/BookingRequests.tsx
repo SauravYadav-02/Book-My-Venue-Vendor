@@ -55,13 +55,13 @@ const BookingRequests = () => {
                     ) : requests.map((req) => (
                         <div key={req._id} className="p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="flex justify-between items-start mb-1">
-                                <h3 className="font-semibold text-sm text-gray-800">{req.userId?.name || 'Unknown User'}</h3>
+                                <h3 className="font-semibold text-sm text-gray-800">{(req.userId as any)?.name || 'Unknown User'}</h3>
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${req.status === 'approved' ? 'bg-green-100 text-green-700' :
                                     req.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                         'bg-yellow-100 text-yellow-700'
                                     }`}>{req.status}</span>
                             </div>
-                            <p className="text-xs text-gray-500">{req.venueId?.name || 'Venue'}</p>
+                            <p className="text-xs text-gray-500">{(req.venueId as any)?.name || 'Venue'}</p>
                             <p className="text-xs text-gray-500 font-medium mt-1">{currencyFormatter.format(req.cost || 0)}</p>
                             <div className="flex justify-between items-center mt-1.5">
                                 <p className="text-xs text-gray-400 flex items-center gap-1.5">

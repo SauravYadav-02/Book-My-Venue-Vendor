@@ -58,3 +58,11 @@ export const updateReportStatusAdmin = async (
   );
   return res.data.report;
 };
+
+// 4. Fetch reports for vendor's own venues
+export const getReportsVendor = async (vendorId: string): Promise<Report[]> => {
+  const res = await axios.get<Report[]>(`${BASE_URL}/vendor`, {
+    headers: { vendorid: vendorId }
+  });
+  return res.data;
+};

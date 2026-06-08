@@ -130,6 +130,7 @@ const Sidebar = () => {
         { label: "Calendar", path: "/calendar", icon: Calendar },
         { label: "Reviews", path: "/reviews", icon: Star },
         { label: "Complaints", path: "/complaints", icon: HelpCircle },
+        { label: "Reports", path: "/reports", icon: AlertCircle },
         { label: "Billing", path: "/billing", icon: Package },
         { label: "Payments", path: "/payments", icon: History },
         { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },

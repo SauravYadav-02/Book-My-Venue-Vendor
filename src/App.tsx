@@ -30,6 +30,7 @@ import VendorComplaints from "./pages/vendor/VendorComplaints";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminComplaints from "./pages/admin/AdminComplaints";
 import AdminReports from "./pages/admin/AdminReports";
+import VendorReports from "./pages/vendor/VendorReports";
 import TermsPage from "./pages/vendor/Terms";
 
 
@@ -83,6 +84,9 @@ export default function App() {
 
             {/* Vendor Complaints */}
             <Route path="/complaints" element={<Layout><VendorComplaints /></Layout>} />
+
+            {/* Vendor Reports */}
+            <Route path="/reports" element={<Layout><VendorReports /></Layout>} />
 
             {/* Admin Routes */}
             <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />

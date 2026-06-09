@@ -51,6 +51,7 @@ export default function VendorRegistrationForm() {
     const [values, setValues] = useState<FormValues>(INIT);
     const [touched, setTouched] = useState<Touched>({});
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
     const [termsError, setTermsError] = useState<string>("");
     const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
@@ -96,10 +97,13 @@ export default function VendorRegistrationForm() {
         }
 
         setStatus("submitting");
+        setErrorMessage("");
         try {
             await createVendor(values);
             setStatus("success");
-        } catch {
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || "Something went wrong while submitting. Please try again.";
+            setErrorMessage(msg);
             setStatus("error");
         }
     }
@@ -253,7 +257,7 @@ export default function VendorRegistrationForm() {
                         {status === "error" && (
                             <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2">
                                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span>Something went wrong while submitting. Please try again.</span>
+                                <span>{errorMessage}</span>
                             </div>
                         )}
 

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const DashBoardCard = () => {
     const navigate = useNavigate();
-    const { currentSubscription, loading } = useSubscription();
+    const { vendorSubscription, venueUsage, loading } = useSubscription();
     const [activeComplaintsCount, setActiveComplaintsCount] = useState<number>(0);
 
     useEffect(() => {
@@ -51,31 +51,30 @@ const DashBoardCard = () => {
         return diffDays;
     };
 
-    const daysRemaining = currentSubscription ? getDaysRemaining(currentSubscription.endDate) : null;
-    const isExpiringSoon = daysRemaining !== null && daysRemaining <= 5;
+    const daysRemaining = vendorSubscription ? getDaysRemaining(vendorSubscription.expiresAt) : null;
 
     // determine colors based on expiry status
     let subBorderColor = "border-purple-100";
     let subBgColor = "bg-purple-50";
     let expiryColorClass = "text-gray-600";
-    let statusColorClass = "text-purple-600";
     
-    if (currentSubscription) {
-        if (currentSubscription.status === "expired") {
-            subBorderColor = "border-red-200";
-            subBgColor = "bg-red-50";
-            expiryColorClass = "text-red-600 font-bold";
-            statusColorClass = "text-red-600 font-bold";
-        } else if (isExpiringSoon) {
-            subBorderColor = "border-red-200 animate-pulse";
-            subBgColor = "bg-red-50";
-            expiryColorClass = "text-red-600 font-bold";
-            statusColorClass = "text-red-500 font-bold";
+    if (vendorSubscription) {
+        if (vendorSubscription.status === "expired") {
+            subBorderColor = "border-red-200 bg-red-50/20";
+            subBgColor = "bg-red-50/20";
+            expiryColorClass = "text-red-650 font-bold";
+        } else if (vendorSubscription.status === "grace") {
+            subBorderColor = "border-amber-250 animate-pulse bg-amber-50/30";
+            subBgColor = "bg-amber-50/30";
+            expiryColorClass = "text-amber-700 font-bold";
+        } else {
+            subBorderColor = "border-emerald-100 bg-emerald-50/10";
+            subBgColor = "bg-emerald-50/10";
+            expiryColorClass = "text-emerald-700 font-medium";
         }
     } else {
         subBorderColor = "border-gray-200";
         subBgColor = "bg-gray-50";
-        statusColorClass = "text-gray-500";
     }
 
     const cardData = [
@@ -126,69 +125,98 @@ const DashBoardCard = () => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 w-full">
-            {cardData.map(({ id, title, value, subtext, subtextColor, Icon, borderColor, bgColor, path }) => (
-                <div
-                    key={id}
-                    onClick={() => path && navigate(path)}
-                    className={`border rounded-xl p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between ${path ? "cursor-pointer hover:shadow-md transition-all active:scale-[0.99]" : ""}`}
-                >
-                    <div>
-                        <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">
-                            <span>{title}</span>
-                            <Icon className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
-                        </div>
-                        <div className="text-3xl font-bold mb-2 text-gray-900">{value}</div>
-                    </div>
-                    <div className={`text-sm font-medium ${subtextColor}`}>{subtext}</div>
+        <div className="flex flex-col gap-6 w-full">
+            {/* Grace Period Warning Banner */}
+            {vendorSubscription && vendorSubscription.status === "grace" && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3 text-amber-700 shadow-sm animate-pulse">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
+                    <span className="font-semibold text-sm">
+                        Your plan expires in {daysRemaining !== null ? daysRemaining : 0} days —{" "}
+                        <button onClick={() => navigate("/vendor/pricing")} className="underline font-bold text-amber-800 hover:text-amber-950 transition">
+                            renew now
+                        </button>
+                    </span>
                 </div>
-            ))}
+            )}
 
-            {/* Subscription Card */}
-            <div className={`border rounded-xl p-6 shadow-sm w-full ${subBorderColor} ${subBgColor} flex flex-col justify-between`}>
-                {loading ? (
-                    <div className="animate-pulse flex flex-col justify-between h-full">
-                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
-                        <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full"></div>
-                    </div>
-                ) : (
-                    <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 w-full">
+                {cardData.map(({ id, title, value, subtext, subtextColor, Icon, borderColor, bgColor, path }) => (
+                    <div
+                        key={id}
+                        onClick={() => path && navigate(path)}
+                        className={`border rounded-xl p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between ${path ? "cursor-pointer hover:shadow-md transition-all active:scale-[0.99]" : ""}`}
+                    >
                         <div>
                             <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">
-                                <span>SUBSCRIPTION</span>
-                                <CreditCard className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
+                                <span>{title}</span>
+                                <Icon className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
                             </div>
-                            <div className="text-2xl font-bold mb-2 text-gray-900 truncate">
-                                {currentSubscription ? (currentSubscription.planSnapshot?.name || "Premium Partner") : "No Active Plan"}
-                            </div>
+                            <div className="text-3xl font-bold mb-2 text-gray-900">{value}</div>
                         </div>
-                        <div className="text-xs space-y-1.5 font-medium text-gray-600 mt-2">
-                            {currentSubscription ? (
-                                <>
-                                    <div className="flex justify-between">
-                                        <span>Start Date:</span>
-                                        <span className="font-semibold text-gray-800">{formatDate(currentSubscription.startDate)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Expiry Date:</span>
-                                        <span className={`font-semibold ${expiryColorClass}`}>{formatDate(currentSubscription.endDate)}</span>
-                                    </div>
-                                    <div className="pt-1.5 border-t border-gray-100 mt-1 flex justify-between items-center text-sm font-semibold">
-                                        <span>Status:</span>
-                                        <span className={`${statusColorClass} capitalize`}>
-                                            {currentSubscription.status} {daysRemaining !== null && daysRemaining > 0 && `(${daysRemaining}d remaining)`}
-                                        </span>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="text-red-500 font-bold text-sm">
-                                    Subscribe to activate listings
+                        <div className={`text-sm font-medium ${subtextColor}`}>{subtext}</div>
+                    </div>
+                ))}
+
+                {/* New Current Plan Widget */}
+                <div className={`border rounded-xl p-6 shadow-sm w-full ${subBorderColor} ${subBgColor} flex flex-col justify-between`}>
+                    {loading ? (
+                        <div className="animate-pulse flex flex-col justify-between h-full">
+                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+                            <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                        </div>
+                    ) : (
+                        <>
+                            <div>
+                                <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">
+                                    <span>CURRENT PLAN</span>
+                                    <CreditCard className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
                                 </div>
-                            )}
-                        </div>
-                    </>
-                )}
+                                <div className="text-xl font-bold text-gray-900 truncate">
+                                    {vendorSubscription ? (vendorSubscription.planId?.name || "Standard Plan") : "Free Tier"}
+                                </div>
+                                {vendorSubscription && (
+                                    <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-200/60 text-gray-700 uppercase tracking-wider">
+                                        {vendorSubscription.cycle}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            <div className="text-xs space-y-1.5 font-medium text-gray-600 mt-2">
+                                <div className="flex justify-between pt-1">
+                                    <span>Venue Usage:</span>
+                                    <span className="font-bold text-gray-800">
+                                        {venueUsage} / {vendorSubscription ? vendorSubscription.planId?.maxVenues : 1}
+                                    </span>
+                                </div>
+                                {vendorSubscription ? (
+                                    <>
+                                        <div className="flex justify-between">
+                                            <span>Expiry Date:</span>
+                                            <span className={`font-semibold ${expiryColorClass}`}>{formatDate(vendorSubscription.expiresAt)}</span>
+                                        </div>
+                                        <div className="pt-1.5 border-t border-gray-150 mt-1 flex justify-between items-center text-sm font-semibold">
+                                            <span>Status:</span>
+                                            <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
+                                                vendorSubscription.status === "active"
+                                                    ? "bg-green-100 text-green-800"
+                                                    : vendorSubscription.status === "grace"
+                                                    ? "bg-amber-100 text-amber-800"
+                                                    : "bg-red-100 text-red-800"
+                                            }`}>
+                                                {vendorSubscription.status}
+                                            </span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-red-500 font-bold text-sm mt-1">
+                                        No active plan found
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

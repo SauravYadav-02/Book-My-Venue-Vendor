@@ -98,11 +98,25 @@ export const confirmPayment = async (vendorId: string, transactionId: string) =>
   return res.data;
 };
 
-export const getCurrentSubscription = async (vendorId: string) => {
+export interface PlanLimits {
+  maxVenues: number;
+  maxPhotos: number;
+  visibilityBoost: boolean;
+  customBranding: boolean;
+  supportTier: string;
+}
+
+export interface SubscriptionResponse {
+  success: boolean;
+  subscription: Subscription;
+  planLimits: PlanLimits;
+}
+
+export const getCurrentSubscription = async (vendorId: string): Promise<SubscriptionResponse> => {
   const res = await axios.get(`${API_URL}/subscription`, {
     headers: { vendorid: vendorId },
   });
-  return res.data.subscription;
+  return res.data;
 };
 
 export const getSubscriptionQueue = async (vendorId: string) => {
@@ -129,3 +143,63 @@ export const getMyAddons = async (vendorId: string): Promise<AddonSubscription[]
   });
   return res.data.addons;
 };
+
+// ── NEW VENDOR SUBSCRIPTION SYSTEM ─────────────────────────────
+
+export interface VendorPlan {
+  _id: string;
+  name: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  maxVenues: number;
+  visibilityBoost: boolean;
+  customBranding: boolean;
+  supportTier: "basic" | "priority";
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface VendorSubscription {
+  _id: string;
+  vendorId: string;
+  planId: VendorPlan;
+  cycle: "monthly" | "yearly";
+  startDate: string;
+  expiresAt: string;
+  status: "active" | "grace" | "expired";
+  paymentRef?: string;
+}
+
+export interface VendorSubscriptionStatusResponse {
+  subscription: VendorSubscription | null;
+  venueUsage: number;
+  planLimits: PlanLimits;
+}
+
+export const getVendorPlans = async (): Promise<VendorPlan[]> => {
+  const res = await axios.get(`${API_URL}/api/vendor/subscription/plans`);
+  return res.data;
+};
+
+export const subscribeToPlan = async (
+  vendorId: string,
+  planId: string,
+  cycle: "monthly" | "yearly",
+  paymentRef?: string
+): Promise<{ message: string; subscription: VendorSubscription }> => {
+  const res = await axios.post(
+    `${API_URL}/api/vendor/subscription/subscribe`,
+    { planId, cycle, paymentRef },
+    { headers: { vendorid: vendorId } }
+  );
+  return res.data;
+};
+
+export const getVendorSubscription = async (vendorId: string): Promise<VendorSubscriptionStatusResponse> => {
+  const res = await axios.get(`${API_URL}/api/vendor/subscription`, {
+    headers: { vendorid: vendorId },
+  });
+  return res.data;
+};
+

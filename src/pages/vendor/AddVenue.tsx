@@ -16,7 +16,7 @@ import toastNotification from "react-hot-toast";
 
 export default function AddVenue() {
   const navigate = useNavigate();
-  const { currentSubscription, loading: subLoading } = useSubscription();
+  const { currentSubscription, planLimits, venueUsage, loading: subLoading } = useSubscription();
 
   useEffect(() => {
     if (!subLoading) {
@@ -24,9 +24,16 @@ export default function AddVenue() {
       if (!currentSubscription || (status !== "ACTIVE" && status !== "active")) {
         toastNotification.error("You need an active subscription to add venues.");
         navigate("/billing");
+        return;
+      }
+
+      const limit = planLimits?.maxVenues || 1;
+      if (venueUsage >= limit) {
+        toastNotification.error(`Limit reached: You have reached the maximum number of venues (${limit}) allowed for your plan.`);
+        navigate("/billing");
       }
     }
-  }, [currentSubscription, subLoading, navigate]);
+  }, [currentSubscription, planLimits, venueUsage, subLoading, navigate]);
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<VenueForm>({ ...INITIAL_FORM, amenities: new Set() });
@@ -86,9 +93,14 @@ export default function AddVenue() {
   };
 
   const addMedia = (files: File[]) => {
+    const photoLimit = planLimits?.maxPhotos || 10;
+    const totalSelected = form.mediaFiles.length + files.length;
+    if (totalSelected > photoLimit) {
+      toastNotification.error(`Limit exceeded: You can only upload a maximum of ${photoLimit} photos per venue.`);
+    }
     setForm((prev) => ({
       ...prev,
-      mediaFiles: [...prev.mediaFiles, ...files].slice(0, 10),
+      mediaFiles: [...prev.mediaFiles, ...files].slice(0, photoLimit),
     }));
   };
 

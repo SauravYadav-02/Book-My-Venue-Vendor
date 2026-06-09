@@ -5,7 +5,7 @@ import { currencyFormatter } from "../../utils/currency";
 import toast from "react-hot-toast";
 
 export default function SubscriptionDashboard() {
-  const { availablePlans, currentSubscription, addons, queue, loading, refreshData, createPayment, confirmSubscription } = useSubscription();
+  const { availablePlans, currentSubscription, addons, queue, loading, refreshData, createPayment, confirmSubscription, planLimits, venueUsage } = useSubscription();
   const [processing, setProcessing] = useState<string | null>(null);
 
   // Fetch vendor ID precisely as stored by LoginPage.tsx
@@ -103,6 +103,24 @@ export default function SubscriptionDashboard() {
                   </p>
                 )}
               </div>
+
+              {/* Plan Limits Section */}
+              {planLimits && (
+                <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-gray-500 block uppercase font-semibold">Venues Limit</span>
+                    <span className="text-lg font-bold text-slate-800">
+                      {venueUsage} / {planLimits.maxVenues} <span className="text-xs text-gray-500 font-normal">used</span>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 block uppercase font-semibold">Photos Limit</span>
+                    <span className="text-lg font-bold text-slate-800">
+                      {planLimits.maxPhotos} <span className="text-xs text-gray-500 font-normal">per venue</span>
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* ✅ Enriched subscription metadata from backend */}
               <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500">

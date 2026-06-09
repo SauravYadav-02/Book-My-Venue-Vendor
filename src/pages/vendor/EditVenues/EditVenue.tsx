@@ -10,11 +10,12 @@ import StepLocation from "../AddVenue/components/StepLocation";
 import StepAmenities from "../AddVenue/components/StepAmenities";
 import StepReview from "../AddVenue/components/StepReview";
 import { useSubscription } from "../../../context/SubscriptionContext";
+import toastNotification from "react-hot-toast";
 
 export default function EditVenue() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { currentSubscription, loading: subLoading } = useSubscription();
+    const { currentSubscription, planLimits, loading: subLoading } = useSubscription();
 
     useEffect(() => {
         if (!subLoading) {
@@ -127,9 +128,14 @@ export default function EditVenue() {
     };
 
     const addMedia = (files: File[]) => {
+        const photoLimit = planLimits?.maxPhotos || 10;
+        const totalSelected = form.mediaFiles.length + files.length;
+        if (totalSelected > photoLimit) {
+            toastNotification.error(`Limit exceeded: You can only upload a maximum of ${photoLimit} photos per venue.`);
+        }
         setForm((prev) => ({
             ...prev,
-            mediaFiles: [...prev.mediaFiles, ...files].slice(0, 10),
+            mediaFiles: [...prev.mediaFiles, ...files].slice(0, photoLimit),
         }));
     };
 

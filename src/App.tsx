@@ -32,7 +32,7 @@ import AdminComplaints from "./pages/admin/AdminComplaints";
 import AdminReports from "./pages/admin/AdminReports";
 import VendorReports from "./pages/vendor/VendorReports";
 import TermsPage from "./pages/vendor/Terms";
-
+import PricingPage from "./pages/vendor/PricingPage";
 
 // Wrapper to provide Subscription context to nested routes via Outlet
 const SubscriptionLayout = () => (
@@ -71,6 +71,7 @@ export default function App() {
 
             {/* Subscription & Billing */}
             <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
+            <Route path="/vendor/pricing" element={<Layout><PricingPage /></Layout>} />
 
             {/* Payment History (existing - all types) */}
             <Route path="/payments" element={<Layout><PaymentHistory /></Layout>} />

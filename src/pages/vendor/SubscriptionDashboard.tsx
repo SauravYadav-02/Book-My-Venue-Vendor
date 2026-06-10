@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
-import { Clock, AlertTriangle, CheckCircle, Package } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle, Package, Sparkles, Layers, ShieldCheck } from "lucide-react";
 import { currencyFormatter } from "../../utils/currency";
 import toast from "react-hot-toast";
 
@@ -10,6 +10,10 @@ export default function SubscriptionDashboard() {
 
   // Fetch vendor ID precisely as stored by LoginPage.tsx
   const vendorId = localStorage.getItem("vendorId") || "";
+
+  // Split plans into Regular (base) and Add-on plans
+  const regularPlans = availablePlans.filter((plan) => !plan.planType || plan.planType === "base");
+  const addonPlans = availablePlans.filter((plan) => plan.planType === "addon" || plan.planType === "full payment");
 
   const handleBuyPlan = async (planId: string) => {
     if (!vendorId) return;
@@ -212,38 +216,181 @@ export default function SubscriptionDashboard() {
         </section>
       )}
 
-      {/* --- Available Plans Store --- */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Upgrade or Renew</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {availablePlans.map((plan) => (
-            <div key={plan._id} className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col">
-              <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Access</p>
-
-              <div className="mt-4 mb-6">
-                <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
-              </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features?.map((feature, i) => (
-                  <li key={i} className="flex items-start text-sm text-gray-600">
-                    <CheckCircle className="text-green-500 mr-2 shrink-0" size={18} />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => handleBuyPlan(plan._id)}
-                disabled={processing === plan._id}
-                className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center"
-              >
-                {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now")}
-              </button>
-            </div>
-          ))}
+      {/* --- Regular Subscriptions Section --- */}
+      <section className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <ShieldCheck className="text-brand-primary" size={24} />
+            Regular Subscription Plans
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Choose a base subscription plan to unlock venue listing capabilities and scale your venue business.
+          </p>
         </div>
+
+        {regularPlans.length === 0 ? (
+          <div className="bg-white border rounded-2xl p-8 text-center text-gray-500 shadow-sm">
+            No regular subscription plans currently available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {regularPlans.map((plan) => (
+              <div
+                key={plan._id}
+                className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col relative overflow-hidden"
+              >
+                {plan.name.toLowerCase().includes("pro") && (
+                  <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-brand-primary to-green-500" />
+                )}
+
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 mt-1">
+                      Base Plan
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Access</p>
+
+                <div className="mt-4 mb-6">
+                  <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
+                </div>
+
+                {/* Plan limits block */}
+                <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Plan Limits</div>
+                  <div className="text-sm text-slate-700 flex justify-between">
+                    <span>Max Venues:</span>
+                    <span className="font-bold">{plan.maxVenues || 0}</span>
+                  </div>
+                  <div className="text-sm text-slate-700 flex justify-between">
+                    <span>Max Photos / Venue:</span>
+                    <span className="font-bold">{plan.maxPhotos || 0}</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features?.map((feature, i) => (
+                    <li key={i} className="flex items-start text-sm text-gray-600">
+                      <CheckCircle className="text-brand-primary mr-2 shrink-0 mt-0.5" size={16} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handleBuyPlan(plan._id)}
+                  disabled={processing === plan._id}
+                  className="w-full py-3 px-4 bg-brand-primary hover:bg-brand-light disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none"
+                >
+                  {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now")}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* --- Add-on Upgrade Plans Section --- */}
+      <section className="space-y-6 pt-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Sparkles className="text-indigo-600" size={24} />
+            Optional Add-on Plans
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Displaying all optional upgrades. Boost your venue listings with extra capacity that complements your base plans.
+          </p>
+        </div>
+
+        {addonPlans.length === 0 ? (
+          <div className="bg-white border border-dashed rounded-2xl p-8 text-center text-gray-400">
+            No optional add-on upgrades currently available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {addonPlans.map((plan) => (
+              <div
+                key={plan._id}
+                className="border border-indigo-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-b from-indigo-50/20 to-white flex flex-col relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
+
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 mt-1">
+                      Upgrade Pack
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Validity</p>
+
+                <div className="mt-4 mb-6">
+                  <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
+                </div>
+
+                {/* Parent plan / complement relationship */}
+                {plan.parentPlanId ? (
+                  <div className="mb-4 p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl">
+                    <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Sparkles size={12} /> Complements Base Plan
+                    </div>
+                    <p className="text-xs text-indigo-700">
+                      Enhances your active <strong className="font-bold text-indigo-900">{typeof plan.parentPlanId === "object" && plan.parentPlanId ? plan.parentPlanId.name : "matching"}</strong> plan.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mb-4 p-3 bg-emerald-50/50 border border-emerald-100/50 rounded-xl">
+                    <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Layers size={12} /> Universal Upgrade
+                    </div>
+                    <p className="text-xs text-emerald-700">
+                      Compatible with any active base subscription.
+                    </p>
+                  </div>
+                )}
+
+                {/* Plan limits block */}
+                <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Upgrade Features</div>
+                  {plan.maxVenues && plan.maxVenues > 0 ? (
+                    <div className="text-sm text-slate-700 flex justify-between">
+                      <span>Extra Venues Allowed:</span>
+                      <span className="font-bold text-indigo-600">+{plan.maxVenues}</span>
+                    </div>
+                  ) : null}
+                  {plan.maxPhotos && plan.maxPhotos > 0 ? (
+                    <div className="text-sm text-slate-700 flex justify-between">
+                      <span>Extra Photos / Venue:</span>
+                      <span className="font-bold text-indigo-600">+{plan.maxPhotos}</span>
+                    </div>
+                  ) : null}
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features?.map((feature, i) => (
+                    <li key={i} className="flex items-start text-sm text-gray-600">
+                      <CheckCircle className="text-indigo-500 mr-2 shrink-0 mt-0.5" size={16} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handleBuyPlan(plan._id)}
+                  disabled={processing === plan._id}
+                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none shadow-sm shadow-indigo-100"
+                >
+                  {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Purchase Add-on" : "Activate Add-on")}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

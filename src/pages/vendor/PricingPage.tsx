@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
-import { Check, Sparkles, Shield, Zap, RefreshCw, AlertCircle, CheckCircle, X } from "lucide-react";
-import toast from "react-hot-toast";
+import { Check, Sparkles, Shield, RefreshCw, CheckCircle, X } from "lucide-react";
 
 export default function PricingPage() {
   const { vendorPlans, vendorSubscription, fetchVendorPlans, fetchVendorSubscription, subscribeToVendorPlan } = useSubscription();

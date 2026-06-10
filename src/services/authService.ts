@@ -8,9 +8,9 @@ export const loginUser = async (
 ): Promise<LoginResponse> => {
     const url =
         role === "user"
-            // ? "http://localhost:3000/users/login"
             ? "http://localhost:3000/users/login"
-            // : "http://localhost:3000/vendors/login";
+            : role === "admin"
+            ? "http://localhost:3000/admin/login"
             : "http://localhost:3000/vendors/login";
 
     try {

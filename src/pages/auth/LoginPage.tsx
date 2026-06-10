@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Building2, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import type { LoginForm } from "../../types/authTypes";
@@ -72,6 +72,7 @@ const InputField: React.FC<InputFieldProps> = ({
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
 
     // Check if vendor is already logged in and redirect them
@@ -80,7 +81,10 @@ const LoginPage: React.FC = () => {
         if (vendorId) {
             navigate("/dashboard", { replace: true });
         }
-    }, [navigate]); // runs on mount and whenever navigate changes
+        if (searchParams.get("suspended") === "true") {
+            toast.error("Your vendor account has been suspended. Please contact support.");
+        }
+    }, [navigate, searchParams]); // runs on mount and whenever navigate changes
 
     const [form, setForm] = useState<LoginForm>({
         username: "",
@@ -118,8 +122,26 @@ const LoginPage: React.FC = () => {
                 toast.error("Invalid credentials");
                 setLoading(false);
             }
-        } catch {
-            toast.error("Login Failed ❌");
+        } catch (error: any) {
+            // If vendor login fails because vendor is not found (404), try admin login
+            if (error?.response?.status === 404) {
+                try {
+                    const data = await loginUser("admin", { username: form.username, password: form.password });
+                    if ("admin" in data) {
+                        localStorage.setItem("adminId", data.admin._id);
+                        toast.success("Admin Login Success 🚀");
+                        setTimeout(() => navigate("/dashboard", { replace: true }), 800);
+                        return;
+                    }
+                } catch (adminError: any) {
+                    const serverMessage = adminError?.response?.data?.message || "Login Failed ❌";
+                    toast.error(serverMessage);
+                    setLoading(false);
+                    return;
+                }
+            }
+            const serverMessage = error?.response?.data?.message || "Login Failed ❌";
+            toast.error(serverMessage);
             setLoading(false);
         }
     };

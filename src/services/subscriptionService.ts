@@ -11,6 +11,15 @@ export interface Plan {
   price: number;
   is_active: boolean;
   features: string[];
+  planType?: "base" | "addon" | "full payment";
+  parentPlanId?: {
+    _id: string;
+    name: string;
+    price: number;
+    duration_days: number;
+  } | string | null;
+  maxVenues?: number;
+  maxPhotos?: number;
 }
 
 export interface Subscription {

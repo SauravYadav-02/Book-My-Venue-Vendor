@@ -5,6 +5,7 @@ import {
 } from "../../services/paymentService";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
+import { RemainingPaymentPanel } from "../../components/vendor/RemainingPaymentPanel";
 import {
   CheckCircle2,
   XCircle,
@@ -85,6 +86,7 @@ const SummaryCard = ({
 const Bookings = () => {
   const [bookings, setBookings] = useState<VendorPaymentBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<VendorPaymentBooking | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "success" | "failed">(
     "all"
   );
@@ -263,7 +265,8 @@ const Bookings = () => {
                   return (
                     <tr
                       key={booking.bookingId}
-                      className="hover:bg-gray-50/70 transition-colors duration-150 group"
+                      onClick={() => setSelectedBooking(booking)}
+                      className="hover:bg-gray-50/70 cursor-pointer transition-colors duration-150 group"
                     >
                       {/* Customer */}
                       <td className="py-4 px-5">
@@ -379,6 +382,38 @@ const Bookings = () => {
           </div>
         )}
       </div>
+
+      {/* Booking Detail Modal */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl border border-gray-100 flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h2 className="font-serif text-lg font-bold text-gray-900">Booking & Payment Details</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Booking Date: {format(new Date(selectedBooking.date), 'dd/MM/yyyy')}</p>
+              </div>
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4 text-sm font-medium text-gray-700">
+                Customer: <span className="font-bold">{selectedBooking.user?.name || "Unknown Customer"}</span> ({selectedBooking.user?.email || "No email"})
+              </div>
+              <RemainingPaymentPanel 
+                booking={selectedBooking} 
+                onSuccess={() => {
+                  fetchBookings();
+                  setSelectedBooking(null);
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

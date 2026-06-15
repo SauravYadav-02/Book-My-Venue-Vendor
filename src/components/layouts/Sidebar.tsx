@@ -118,6 +118,7 @@ const Sidebar = () => {
     const isAdminUser = !!localStorage.getItem("adminId");
     const itemsToShow = isAdminUser ? [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+        { label: "Venues", path: "/admin/venues", icon: ClipboardList },
         { label: "Plans", path: "/admin/plans", icon: Package },
         { label: "Reviews", path: "/admin/reviews", icon: Star },
         { label: "Complaints", path: "/admin/complaints", icon: HelpCircle },

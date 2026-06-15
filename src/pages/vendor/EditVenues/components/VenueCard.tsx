@@ -7,10 +7,12 @@ interface VenueCardProps {
     venue: Venue;
     onEdit: () => void;
     onDelete: () => void;
+    onDeactivate?: () => void;
+    onReactivate?: () => void;
     onClick?: () => void;
 }
 
-export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCardProps) {
+export default function VenueCard({ venue, onEdit, onDelete, onDeactivate, onReactivate, onClick }: VenueCardProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
@@ -110,7 +112,17 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                 </div>
                 {/* Status badge */}
                 <div className="absolute top-2.5 right-2.5 flex flex-col items-end gap-1.5">
-                    {venue.status && (
+                    {venue.deactivated && venue.deactivatedBy === "admin" && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-rose-600 text-white border border-white/20 backdrop-blur-sm shadow-sm">
+                            🛑 Deactivated by Admin {venue.suspensionStart && venue.suspensionEnd ? `(${new Date(venue.suspensionStart).toLocaleDateString()} - ${new Date(venue.suspensionEnd).toLocaleDateString()})` : ''}
+                        </span>
+                    )}
+                    {venue.deactivated && venue.deactivatedBy === "vendor" && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-amber-500 text-white border border-white/20 backdrop-blur-sm shadow-sm">
+                            ⏳ Temporarily Unavailable {venue.suspensionStart && venue.suspensionEnd ? `(${new Date(venue.suspensionStart).toLocaleDateString()} - ${new Date(venue.suspensionEnd).toLocaleDateString()})` : ''}
+                        </span>
+                    )}
+                    {!venue.deactivated && venue.status && (
                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm
                             ${venue.status === 'approved' ? 'bg-emerald-500 text-white' :
                                 venue.status === 'rejected' ? 'bg-rose-500 text-white' :
@@ -191,7 +203,7 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                 )}
 
                 {/* Edit + Delete buttons */}
-                <div className="flex gap-2 mt-auto pt-3 border-t border-slate-50">
+                <div className="flex gap-2 mt-auto pt-3 border-t border-slate-50 flex-wrap sm:flex-nowrap">
                     <button
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl
@@ -216,6 +228,27 @@ export default function VenueCard({ venue, onEdit, onDelete, onClick }: VenueCar
                         </svg>
                         Delete
                     </button>
+                    {!(venue.deactivated && venue.deactivatedBy === "admin") && (
+                        venue.deactivated ? (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onReactivate?.(); }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl
+                                    border border-amber-200 bg-amber-50 shadow-sm text-xs font-semibold text-amber-700
+                                    hover:bg-amber-100 hover:border-amber-300 hover:text-amber-800 transition-all"
+                            >
+                                Reactivate
+                            </button>
+                        ) : (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onDeactivate?.(); }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl
+                                    border border-slate-200 bg-white shadow-sm text-xs font-semibold text-slate-600
+                                    hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 transition-all"
+                            >
+                                Deactivate
+                            </button>
+                        )
+                    )}
                 </div>
             </div>
         </div>

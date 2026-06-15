@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getVenuesByVendor, deleteVenue, type Venue } from "../../../services/venueService";
+import { getVenuesByVendor, deleteVenue, vendorDeactivateVenue, vendorReactivateVenue, type Venue } from "../../../services/venueService";
 import VenueCard from "../EditVenues/components/VenueCard";
 import { currencyFormatter } from "../../../utils/currency";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 export default function VenueList() {
     const navigate = useNavigate();
+    const todayStr = new Date().toISOString().split("T")[0];
     const [venues, setVenues] = useState<Venue[]>([]);
     const [pagination, setPagination] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [deactivating, setDeactivating] = useState(false);
+    const [deactivateVenueId, setDeactivateVenueId] = useState<string | null>(null);
+    const [suspensionStart, setSuspensionStart] = useState("");
+    const [suspensionEnd, setSuspensionEnd] = useState("");
+    const [deactivationReason, setDeactivationReason] = useState("");
     const [deleting, setDeleting] = useState(false);
     const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -61,10 +68,68 @@ export default function VenueList() {
             await deleteVenue(deleteId);
             setVenues((prev) => prev.filter((v) => v._id !== deleteId));
             setDeleteId(null);
+            toast.success("Venue deleted successfully.");
         } catch {
             setError("Failed to delete venue.");
         } finally {
             setDeleting(false);
+        }
+    };
+
+    const handleDeactivateConfirm = async () => {
+        if (!deactivateVenueId || !suspensionStart || !suspensionEnd) {
+            setError("Start date and end date are required.");
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const start = new Date(suspensionStart);
+        start.setHours(0, 0, 0, 0);
+
+        if (start < today) {
+            setError("Suspension start date cannot be in the past.");
+            return;
+        }
+
+        const end = new Date(suspensionEnd);
+        end.setHours(0, 0, 0, 0);
+
+        if (end < start) {
+            setError("Suspension end date must be greater than or equal to start date.");
+            return;
+        }
+
+        try {
+            setDeactivating(true);
+            const updated = await vendorDeactivateVenue(deactivateVenueId, {
+                suspensionStart,
+                suspensionEnd,
+                reason: deactivationReason
+            });
+            setVenues((prev) => prev.map((v) => v._id === deactivateVenueId ? updated : v));
+            setDeactivateVenueId(null);
+            setSuspensionStart("");
+            setSuspensionEnd("");
+            setDeactivationReason("");
+            setError("");
+            toast.success("Venue deactivated successfully.");
+        } catch (err: any) {
+            setError(err.message || "Failed to deactivate venue.");
+        } finally {
+            setDeactivating(false);
+        }
+    };
+
+    const handleReactivate = async (venueId: string) => {
+        try {
+            const updated = await vendorReactivateVenue(venueId);
+            setVenues((prev) => prev.map((v) => v._id === venueId ? updated : v));
+            setError("");
+            toast.success("Venue reactivated successfully.");
+        } catch (err: any) {
+            setError(err.message || "Failed to reactivate venue.");
         }
     };
 
@@ -135,6 +200,10 @@ export default function VenueList() {
                                     venue={venue}
                                     onEdit={() => navigate(`/venue/edit/${venue._id}`)}
                                     onDelete={() => setDeleteId(venue._id)}
+                                    onDeactivate={() => {
+                                        setDeactivateVenueId(venue._id);
+                                    }}
+                                    onReactivate={() => handleReactivate(venue._id)}
                                     onClick={() => {
                                         setCurrentImageIndex(0);
                                         setSelectedVenue(venue);
@@ -226,6 +295,95 @@ export default function VenueList() {
                 </div>
             )}
 
+            {/* Deactivate Modal */}
+            {deactivateVenueId && (
+                <div
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+                    onClick={() => {
+                        setDeactivateVenueId(null);
+                        setSuspensionStart("");
+                        setSuspensionEnd("");
+                        setDeactivationReason("");
+                    }}
+                >
+                    <div
+                        className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-lg font-bold text-slate-800 mb-2">
+                            Temporarily Deactivate Venue
+                        </h2>
+                        <p className="text-sm text-slate-500 mb-4">
+                            Define the date range during which this venue will be unavailable.
+                        </p>
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
+                                    Suspension Start Date *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={suspensionStart}
+                                    min={todayStr}
+                                    onChange={(e) => setSuspensionStart(e.target.value)}
+                                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
+                                    Suspension End Date *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={suspensionEnd}
+                                    min={suspensionStart || todayStr}
+                                    onChange={(e) => setSuspensionEnd(e.target.value)}
+                                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
+                                    Reason for Deactivation
+                                </label>
+                                <textarea
+                                    value={deactivationReason}
+                                    onChange={(e) => setDeactivationReason(e.target.value)}
+                                    placeholder="e.g., Maintenance, holidays, renovation..."
+                                    rows={3}
+                                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setDeactivateVenueId(null);
+                                    setSuspensionStart("");
+                                    setSuspensionEnd("");
+                                    setDeactivationReason("");
+                                }}
+                                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm
+                                    font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeactivateConfirm}
+                                disabled={deactivating}
+                                className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600
+                                    text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                            >
+                                {deactivating ? "Deactivating..." : "Deactivate"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* View Details modal */}
             {selectedVenue && (
                 <div
@@ -303,6 +461,16 @@ export default function VenueList() {
 
                                 <div className="absolute bottom-6 left-6 right-6">
                                     <div className="flex gap-2 mb-2">
+                                        {selectedVenue.deactivated && selectedVenue.deactivatedBy === "admin" && (
+                                            <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-rose-600 text-white border border-white/20 backdrop-blur-sm shadow-sm">
+                                                🛑 Deactivated by Admin {selectedVenue.suspensionStart && selectedVenue.suspensionEnd ? `(${new Date(selectedVenue.suspensionStart).toLocaleDateString()} - ${new Date(selectedVenue.suspensionEnd).toLocaleDateString()})` : ''}
+                                            </span>
+                                        )}
+                                        {selectedVenue.deactivated && selectedVenue.deactivatedBy === "vendor" && (
+                                            <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-amber-500 text-white border border-white/20 backdrop-blur-sm shadow-sm">
+                                                ⏳ Temporarily Unavailable {selectedVenue.suspensionStart && selectedVenue.suspensionEnd ? `(${new Date(selectedVenue.suspensionStart).toLocaleDateString()} - ${new Date(selectedVenue.suspensionEnd).toLocaleDateString()})` : ''}
+                                            </span>
+                                        )}
                                         {selectedVenue.status && (
                                             <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-sm border border-white/20 backdrop-blur-sm
                                                 ${selectedVenue.status === 'approved' ? 'bg-emerald-500 text-white' :
@@ -413,17 +581,50 @@ export default function VenueList() {
                                 )}
 
                                 {/* Admin Rejection Message */}
-                                {selectedVenue.status === 'rejected' && selectedVenue.adminDescription && (
-                                    <div className="bg-rose-50 border border-rose-200 p-5 rounded-xl shadow-sm">
-                                        <h3 className="text-sm font-bold text-rose-700 flex items-center gap-2 mb-2">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                            Rejection Reason
-                                        </h3>
-                                        <p className="text-sm text-rose-600 leading-relaxed font-medium">
-                                            {selectedVenue.adminDescription}
-                                        </p>
-                                    </div>
-                                )}
+                                        {selectedVenue.status === 'rejected' && selectedVenue.adminDescription && (
+                                            <div className="bg-rose-50 border border-rose-200 p-5 rounded-xl shadow-sm">
+                                                <h3 className="text-sm font-bold text-rose-700 flex items-center gap-2 mb-2">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                    Rejection Reason
+                                                </h3>
+                                                <p className="text-sm text-rose-600 leading-relaxed font-medium">
+                                                    {selectedVenue.adminDescription}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Deactivation Message */}
+                                        {selectedVenue.deactivated && (
+                                            <div className={`p-5 rounded-xl border shadow-sm ${
+                                                selectedVenue.deactivatedBy === 'admin' 
+                                                    ? 'bg-rose-50/50 border-rose-200 text-rose-700' 
+                                                    : 'bg-amber-50/50 border-amber-200 text-amber-700'
+                                            }`}>
+                                                <h3 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                                    {selectedVenue.deactivatedBy === 'admin' ? (
+                                                        <>
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                            Deactivated by Admin
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                            Temporarily Unavailable
+                                                        </>
+                                                    )}
+                                                </h3>
+                                                {selectedVenue.suspensionStart && selectedVenue.suspensionEnd && (
+                                                    <p className="text-sm font-semibold mb-2">
+                                                        Period: {new Date(selectedVenue.suspensionStart).toLocaleDateString()} - {new Date(selectedVenue.suspensionEnd).toLocaleDateString()}
+                                                    </p>
+                                                )}
+                                                {selectedVenue.deactivationReason && (
+                                                    <p className="text-sm italic leading-relaxed font-medium">
+                                                        Reason: {selectedVenue.deactivationReason}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
 
                             </div>
 

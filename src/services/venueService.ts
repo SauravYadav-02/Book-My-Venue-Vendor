@@ -49,6 +49,12 @@ export interface Venue {
 
     isSubscriptionActive?: boolean;
 
+    deactivated?: boolean;
+    deactivatedBy?: "admin" | "vendor" | null;
+    deactivationReason?: string;
+    suspensionStart?: string;
+    suspensionEnd?: string;
+
     createdAt?: string;
     updatedAt?: string;
 }
@@ -336,4 +342,39 @@ export const venueService = {
             return handleError(error);
         }
     },
+};
+
+export const vendorDeactivateVenue = async (
+    venueId: string,
+    payload: { suspensionStart: string; suspensionEnd: string; reason?: string }
+): Promise<Venue> => {
+    try {
+        const vendorId = localStorage.getItem("vendorId");
+        const response = await api.patch<Venue>(
+            `/venues/${venueId}/vendor-deactivate`,
+            payload,
+            {
+                headers: { vendorid: vendorId }
+            }
+        );
+        return normalizeVenue(response.data);
+    } catch (error) {
+        return handleError(error);
+    }
+};
+
+export const vendorReactivateVenue = async (venueId: string): Promise<Venue> => {
+    try {
+        const vendorId = localStorage.getItem("vendorId");
+        const response = await api.patch<Venue>(
+            `/venues/${venueId}/vendor-reactivate`,
+            {},
+            {
+                headers: { vendorid: vendorId }
+            }
+        );
+        return normalizeVenue(response.data);
+    } catch (error) {
+        return handleError(error);
+    }
 };

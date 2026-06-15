@@ -14,4 +14,8 @@ export interface VendorResponse {
     vendor: { _id: string };
 }
 
-export type LoginResponse = UserResponse | VendorResponse;
+export interface AdminResponse {
+    admin: { _id: string };
+}
+
+export type LoginResponse = UserResponse | VendorResponse | AdminResponse;

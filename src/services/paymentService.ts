@@ -20,10 +20,19 @@ export interface VendorPaymentBooking {
   amountPaid: number;
   remainingAmount: number;
   upfrontPaymentAmount: number;
-  paymentStatus: "pending" | "success" | "failed";
+  paymentStatus: "pending" | "success" | "failed" | "cancelled";
   transactionId: string | null;
   timestamp: string;
   bookingStatus: string;
+  cancellation?: {
+    cancelledAt: string | null;
+    cancelledBy: "user" | "admin" | "vendor" | null;
+    refundTier: "full" | "50%" | "25%" | "none" | null;
+    refundAmount: number;
+    refundStatus: "pending" | "processed" | "none";
+    reason: string;
+    daysBeforeEvent: number | null;
+  } | null;
 }
 
 export interface VendorBookingsResponse {

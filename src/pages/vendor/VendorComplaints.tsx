@@ -30,7 +30,7 @@ export default function VendorComplaints() {
   const [listLoading, setListLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // 1. Fetch complaints list on load
   const fetchComplaints = async (silent = false) => {
@@ -84,7 +84,12 @@ export default function VendorComplaints() {
 
   // 3. Scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [messages]);
 
   // 4. Send Message
@@ -148,12 +153,12 @@ export default function VendorComplaints() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-[450px]">
 
         {/* Complaints List Panel */}
-        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full ${selectedComplaint ? "hidden lg:flex" : "flex"}`}>
-          <div className="p-4 border-b border-stone-100 bg-stone-50/30">
+        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full max-h-full overflow-hidden ${selectedComplaint ? "hidden lg:flex" : "flex"}`}>
+          <div className="p-4 border-b border-stone-100 bg-stone-50/30 shrink-0">
             <h2 className="text-xs font-bold uppercase tracking-widest text-stone-400">Assigned Complaints</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 max-h-[600px]">
+          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 min-h-0">
             {listLoading ? (
               <div className="p-8 text-center text-stone-400 text-sm">Loading complaints...</div>
             ) : complaints.length === 0 ? (
@@ -183,12 +188,12 @@ export default function VendorComplaints() {
         </div>
 
         {/* Details & Thread Chat Panel */}
-        <div className={`lg:col-span-8 flex flex-col h-full ${!selectedComplaint ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
+        <div className={`lg:col-span-8 flex flex-col h-full max-h-full overflow-hidden ${!selectedComplaint ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
           {selectedComplaint ? (
-            <div className="flex flex-col h-full min-h-[450px]">
+            <div className="flex flex-col h-full max-h-full overflow-hidden">
 
               {/* Mobile Back / Header */}
-              <div className="p-4 border-b border-stone-200 flex items-center justify-between gap-4 bg-stone-50/30">
+              <div className="p-4 border-b border-stone-200 flex items-center justify-between gap-4 bg-stone-50/30 shrink-0">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSelectedComplaint(null)}
@@ -225,7 +230,7 @@ export default function VendorComplaints() {
               </div>
 
               {/* Grid detail about user, venue, attachments */}
-              <div className="p-4 bg-stone-50/50 border-b border-stone-250 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-stone-600">
+              <div className="p-4 bg-stone-50/50 border-b border-stone-250 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-stone-600 shrink-0">
                 {/* Left: Description */}
                 <div>
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Issue Details</h4>
@@ -273,7 +278,7 @@ export default function VendorComplaints() {
               </div>
 
               {/* Comments/Replies Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[300px] bg-stone-50/20">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-stone-50/20">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8 text-stone-400">
                     <MessageSquare size={32} className="mb-1 text-stone-300" />
@@ -303,11 +308,10 @@ export default function VendorComplaints() {
                     );
                   })
                 )}
-                <div ref={messagesEndRef} />
               </div>
 
               {/* Footer text reply input */}
-              <div className="p-4 border-t border-stone-200 bg-white">
+              <div className="p-4 border-t border-stone-200 bg-white shrink-0">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                   <input
                     type="text"

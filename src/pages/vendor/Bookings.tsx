@@ -3,6 +3,7 @@ import {
   getVendorPaymentBookings,
   type VendorPaymentBooking,
 } from "../../services/paymentService";
+import { processBookingRefund } from "../../services/bookingService";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { RemainingPaymentPanel } from "../../components/vendor/RemainingPaymentPanel";
@@ -26,7 +27,7 @@ import { currencyFormatter } from "../../utils/currency";
 const PaymentStatusBadge = ({
   status,
 }: {
-  status: "pending" | "success" | "failed";
+  status: "pending" | "success" | "failed" | "cancelled";
 }) => {
   const config = {
     success: {
@@ -43,6 +44,11 @@ const PaymentStatusBadge = ({
       icon: <Clock size={13} />,
       label: "Pending",
       className: "bg-amber-100 text-amber-700 border border-amber-200",
+    },
+    cancelled: {
+      icon: <XCircle size={13} className="text-stone-500" />,
+      label: "Cancelled",
+      className: "bg-stone-100 text-stone-600 border border-stone-200",
     },
   };
   const { icon, label, className } = config[status] ?? config.pending;
@@ -87,9 +93,42 @@ const Bookings = () => {
   const [bookings, setBookings] = useState<VendorPaymentBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<VendorPaymentBooking | null>(null);
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "success" | "failed">(
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "success" | "failed" | "cancelled">(
     "all"
   );
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+
+  const handleRefundProcess = async (bookingId: string) => {
+    const vendorId = localStorage.getItem("vendorId");
+    if (!vendorId) {
+      toast.error("Vendor not authenticated");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to mark this refund as processed? This will simulate payout completion.")) {
+      return;
+    }
+    try {
+      setRefundingId(bookingId);
+      const result = await processBookingRefund(bookingId, vendorId, "vendor");
+      if (result.success) {
+        toast.success("Refund processed successfully!");
+        fetchBookings();
+        // Update selectedBooking in modal to reflect status change
+        setSelectedBooking(prev => prev ? { 
+          ...prev, 
+          paymentStatus: "cancelled",
+          cancellation: { ...prev.cancellation, refundStatus: "processed" } as any 
+        } : null);
+      } else {
+        toast.error(result.message || "Failed to process refund.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.error || "Failed to process refund.");
+    } finally {
+      setRefundingId(null);
+    }
+  };
 
   const fetchBookings = useCallback(async () => {
     const vendorId = localStorage.getItem("vendorId");
@@ -115,12 +154,13 @@ const Bookings = () => {
   }, [fetchBookings]);
 
   // ── Derived stats ──────────────────────────────────────────────────
-  const totalRevenue = bookings.reduce((s, b) => s + b.totalAmount, 0);
-  const totalCollected = bookings.reduce((s, b) => s + b.amountPaid, 0);
-  const totalPending = bookings.reduce((s, b) => s + b.remainingAmount, 0);
+  const totalRevenue = bookings.reduce((s, b) => s + (b.paymentStatus === "cancelled" ? (b.amountPaid - (b.cancellation?.refundAmount || 0)) : b.totalAmount), 0);
+  const totalCollected = bookings.reduce((s, b) => s + (b.paymentStatus === "cancelled" ? (b.amountPaid - (b.cancellation?.refundAmount || 0)) : b.amountPaid), 0);
+  const totalPending = bookings.reduce((s, b) => s + (b.paymentStatus === "cancelled" ? 0 : b.remainingAmount), 0);
   const paidCount = bookings.filter((b) => b.paymentStatus === "success").length;
   const failedCount = bookings.filter((b) => b.paymentStatus === "failed").length;
   const pendingCount = bookings.filter((b) => b.paymentStatus === "pending").length;
+  const cancelledCount = bookings.filter((b) => b.paymentStatus === "cancelled").length;
 
   // ── Filtered bookings ─────────────────────────────────────────────
   const filtered =
@@ -196,7 +236,7 @@ const Bookings = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
-            {(["all", "success", "pending", "failed"] as const).map((s) => (
+            {(["all", "success", "pending", "failed", "cancelled"] as const).map((s) => (
               <button
                 key={s}
                 id={`filter-${s}-btn`}
@@ -210,6 +250,7 @@ const Bookings = () => {
                 {s === "all" ? `All (${bookings.length})` :
                  s === "success" ? `Paid (${paidCount})` :
                  s === "pending" ? `Pending (${pendingCount})` :
+                 s === "cancelled" ? `Cancelled (${cancelledCount})` :
                  `Failed (${failedCount})`}
               </button>
             ))}
@@ -325,12 +366,12 @@ const Bookings = () => {
                       <td className="py-4 px-5 text-right">
                         <span
                           className={`text-sm font-bold ${
-                            booking.remainingAmount > 0 && isPaid
+                            booking.remainingAmount > 0 && isPaid && booking.paymentStatus !== "cancelled"
                               ? "text-amber-600"
                               : "text-gray-400"
                           }`}
                         >
-                          {currencyFormatter.format(booking.remainingAmount)}
+                          {booking.paymentStatus === "cancelled" ? "—" : currencyFormatter.format(booking.remainingAmount)}
                         </span>
                       </td>
 
@@ -399,17 +440,82 @@ const Bookings = () => {
                 &times;
               </button>
             </div>
-            <div className="p-6">
-              <div className="mb-4 text-sm font-medium text-gray-700">
-                Customer: <span className="font-bold">{selectedBooking.user?.name || "Unknown Customer"}</span> ({selectedBooking.user?.email || "No email"})
+            <div className="p-6 space-y-6">
+              <div className="text-sm font-medium text-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <div>
+                  Customer: <span className="font-bold">{selectedBooking.user?.name || "Unknown Customer"}</span> ({selectedBooking.user?.email || "No email"})
+                </div>
+                {selectedBooking.paymentStatus === "cancelled" && (
+                  <span className="px-3 py-1 bg-stone-100 border border-stone-200 text-stone-600 rounded-full text-xs font-bold uppercase tracking-wider">
+                    Cancelled
+                  </span>
+                )}
               </div>
-              <RemainingPaymentPanel 
-                booking={selectedBooking} 
-                onSuccess={() => {
-                  fetchBookings();
-                  setSelectedBooking(null);
-                }} 
-              />
+
+              {selectedBooking.paymentStatus === "cancelled" && selectedBooking.cancellation ? (
+                <div className="bg-stone-50 border border-stone-100 rounded-2xl p-5 space-y-4">
+                  <h4 className="font-serif text-[#2d2d2d] font-bold text-base flex items-center gap-2">
+                    <AlertCircle size={18} className="text-stone-500" /> Cancellation Details
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white p-4 rounded-xl border border-stone-100 shadow-sm">
+                      <span className="text-xs text-stone-400 block mb-0.5">Cancelled On</span>
+                      <span className="font-semibold text-stone-700">
+                        {selectedBooking.cancellation.cancelledAt ? format(new Date(selectedBooking.cancellation.cancelledAt), 'dd/MM/yyyy hh:mm a') : '—'}
+                      </span>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-stone-100 shadow-sm">
+                      <span className="text-xs text-stone-400 block mb-0.5">Refund Tier</span>
+                      <span className="font-semibold text-stone-700 capitalize">
+                        {selectedBooking.cancellation.refundTier || 'none'}
+                      </span>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-stone-100 shadow-sm">
+                      <span className="text-xs text-stone-400 block mb-0.5">Refund Amount</span>
+                      <span className="font-bold text-emerald-600">
+                        {currencyFormatter.format(selectedBooking.cancellation.refundAmount || 0)}
+                      </span>
+                      <span className="text-[10px] text-stone-400 block mt-0.5 capitalize">
+                        Process: {selectedBooking.cancellation.refundStatus || 'none'}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedBooking.cancellation.reason && (
+                    <div className="bg-white p-4 rounded-xl border border-stone-100 shadow-sm text-sm">
+                      <span className="text-xs text-stone-400 block mb-1">Reason for Cancellation</span>
+                      <p className="text-stone-600 italic">"{selectedBooking.cancellation.reason}"</p>
+                    </div>
+                  )}
+                  {selectedBooking.cancellation.refundStatus === "pending" && (
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={() => handleRefundProcess(selectedBooking.bookingId)}
+                        disabled={refundingId === selectedBooking.bookingId}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs tracking-wider uppercase transition-colors shadow-md shadow-emerald-600/10 flex items-center gap-2 cursor-pointer border-none"
+                      >
+                        {refundingId === selectedBooking.bookingId ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : null}
+                        Process Refund (Mock)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {selectedBooking.paymentStatus !== "cancelled" ? (
+                <RemainingPaymentPanel 
+                  booking={selectedBooking} 
+                  onSuccess={() => {
+                    fetchBookings();
+                    setSelectedBooking(null);
+                  }} 
+                />
+              ) : (
+                <div className="bg-stone-50 border border-stone-100 rounded-2xl p-5 text-center text-sm text-stone-500">
+                  This booking has been cancelled. No further payment operations can be performed.
+                </div>
+              )}
             </div>
           </div>
         </div>

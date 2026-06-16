@@ -84,3 +84,28 @@ export const getAllBookingsAdmin = async (params = {}) => {
   });
   return res.data; // returns { data, page, limit, totalRecords, totalPages }
 };
+
+export const getAdminBookings = async (
+  adminId: string,
+  page = 1,
+  limit = 10,
+  status = ""
+): Promise<any> => {
+  const res = await axios.get(`${BASE_URL}/`, {
+    headers: { adminid: adminId },
+    params: { page, limit, status },
+  });
+  return res.data;
+};
+
+export const processBookingRefund = async (
+  bookingId: string,
+  actorId: string,
+  actorType: "vendor" | "admin"
+): Promise<{ success: boolean; message: string; booking: any }> => {
+  const res = await axios.put(`${BASE_URL}/${bookingId}/process-refund`, {
+    actorId,
+    actorType,
+  });
+  return res.data;
+};

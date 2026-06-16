@@ -38,15 +38,17 @@ const StatusBadge = ({ status }: { status: "pending" | "success" | "failed" }) =
 };
 
 // ── Type Badge ────────────────────────────────────────────────────────────────
-const TypeBadge = ({ type }: { type: string }) => {
+const TypeBadge = ({ type, isRefund }: { type: string; isRefund?: boolean }) => {
   const cfg: Record<string, string> = {
     "booking":      "bg-blue-100 text-blue-700",
     "subscription": "bg-purple-100 text-purple-700",
     "full payment": "bg-indigo-100 text-indigo-700",
+    "refund":       "bg-rose-100 text-rose-700",
   };
+  const displayType = isRefund ? "refund" : type;
   return (
-    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${cfg[type] || "bg-gray-100 text-gray-600"}`}>
-      {type}
+    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${cfg[displayType] || "bg-gray-100 text-gray-600"}`}>
+      {displayType}
     </span>
   );
 };
@@ -250,7 +252,7 @@ const PaymentHistory = () => {
                     <tr key={entry._id} className="hover:bg-gray-50/70 transition-colors duration-150 group">
                       {/* Type */}
                       <td className="py-4 px-5">
-                        <TypeBadge type={entry.type} />
+                        <TypeBadge type={entry.type} isRefund={entry.description?.toLowerCase().includes("refund")} />
                       </td>
 
                       {/* Party */}
@@ -281,11 +283,15 @@ const PaymentHistory = () => {
                         </div>
                       </td>
 
-                      {/* Amount */}
                       <td className="py-4 px-5 text-right">
-                        <span className="text-sm font-bold text-gray-800">
-                          {currencyFormatter.format(entry.amount)}
-                        </span>
+                        {(() => {
+                          const isRefund = entry.description?.toLowerCase().includes("refund");
+                          return (
+                            <span className={`text-sm font-bold ${isRefund ? "text-rose-600" : "text-gray-800"}`}>
+                              {isRefund ? "-" : ""}{currencyFormatter.format(entry.amount)}
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       {/* Status */}

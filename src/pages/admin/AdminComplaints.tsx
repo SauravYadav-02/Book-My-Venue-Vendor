@@ -39,7 +39,7 @@ export default function AdminComplaints() {
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
   const [filterStatus, setFilterStatus] = useState("All");
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // 1. Fetch complaints list on load
   const fetchComplaints = async (silent = false) => {
@@ -99,7 +99,12 @@ export default function AdminComplaints() {
 
   // 3. Scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [messages]);
 
   // 4. Send Message
@@ -354,7 +359,7 @@ export default function AdminComplaints() {
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[250px] bg-stone-50/20">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[250px] bg-stone-50/20">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8 text-stone-400">
                     <MessageSquare size={32} className="mb-1 text-stone-300" />
@@ -384,7 +389,6 @@ export default function AdminComplaints() {
                     );
                   })
                 )}
-                <div ref={messagesEndRef} />
               </div>
 
               {/* Reply field */}

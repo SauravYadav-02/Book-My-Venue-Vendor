@@ -35,6 +35,7 @@ import AdminBookings from "./pages/admin/AdminBookings";
 import VendorReports from "./pages/vendor/VendorReports";
 import TermsPage from "./pages/vendor/Terms";
 import PricingPage from "./pages/vendor/PricingPage";
+import Blogs from "./pages/vendor/Blogs";
 
 // Wrapper to provide Subscription context to nested routes via Outlet
 const SubscriptionLayout = () => (
@@ -80,6 +81,9 @@ export default function App() {
 
             {/* Terms & Conditions */}
             <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+
+            {/* Blogs */}
+            <Route path="/blogs" element={<Layout><Blogs /></Layout>} />
 
 
             {/* Vendor Reviews */}

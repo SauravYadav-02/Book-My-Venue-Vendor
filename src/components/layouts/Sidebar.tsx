@@ -137,6 +137,7 @@ const Sidebar = () => {
         { label: "Payments", path: "/payments", icon: History },
         { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
         { label: "Terms & Conditions", path: "/terms", icon: FileText },
+        { label: "Blogs", path: "/blogs", icon: FileText },
         { label: "Settings", path: "/settings", icon: Settings },
     ];
 

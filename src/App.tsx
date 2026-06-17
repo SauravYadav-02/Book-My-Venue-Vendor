@@ -32,6 +32,7 @@ import AdminReviews from "./pages/admin/AdminReviews";
 import AdminComplaints from "./pages/admin/AdminComplaints";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminBlogs from "./pages/admin/AdminBlogs";
 import VendorReports from "./pages/vendor/VendorReports";
 import TermsPage from "./pages/vendor/Terms";
 import PricingPage from "./pages/vendor/PricingPage";
@@ -102,6 +103,7 @@ export default function App() {
             <Route path="/admin/complaints" element={<Layout><AdminComplaints /></Layout>} />
             <Route path="/admin/reports" element={<Layout><AdminReports /></Layout>} />
             <Route path="/admin/bookings" element={<Layout><AdminBookings /></Layout>} />
+            <Route path="/admin/blogs" element={<Layout><AdminBlogs /></Layout>} />
           </Route>
         </Route>
 

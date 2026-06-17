@@ -124,6 +124,7 @@ const Sidebar = () => {
         { label: "Reviews", path: "/admin/reviews", icon: Star },
         { label: "Complaints", path: "/admin/complaints", icon: HelpCircle },
         { label: "Reports", path: "/admin/reports", icon: AlertCircle },
+        { label: "Blogs", path: "/admin/blogs", icon: FileText },
         { label: "Settings", path: "/settings", icon: Settings },
     ] : [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },

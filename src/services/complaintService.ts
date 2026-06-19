@@ -41,8 +41,8 @@ export interface ComplaintMessage {
 
 // 1. Get complaints list based on headers (Vendorid or Adminid)
 export const getComplaintsList = async (headers: { vendorid?: string; adminid?: string }): Promise<Complaint[]> => {
-  const res = await axios.get<Complaint[]>(BASE_URL, { headers });
-  return res.data;
+  const res = await axios.get<any>(BASE_URL, { headers });
+  return Array.isArray(res.data) ? res.data : (res.data.data || []);
 };
 
 // 2. Get single complaint details

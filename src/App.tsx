@@ -11,6 +11,7 @@ import VendorRegistrationForm from "./pages/auth/VendorRegistration/VendorRegist
 // Protected Route
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import PublicRoute from "./components/common/PublicRoute";
+import ProtectedVendorRoute from "./components/layouts/ProtectedVendorRoute";
 
 // Vendor Venue Pages
 import AddVenue from "./pages/vendor/AddVenue";
@@ -64,46 +65,46 @@ export default function App() {
           {/* Wrap all protected routes with SubscriptionProvider so we can globally check access */}
           <Route element={<SubscriptionLayout />}>
             {/* Vendor Dashboard */}
-            <Route path="/dashboard" element={<MainLayout />} />
+            <Route path="/dashboard" element={<ProtectedVendorRoute><MainLayout /></ProtectedVendorRoute>} />
 
             {/* Vendor Venue Management (Wrapped in Layout for Sidebar/Navbar) */}
-            <Route path="/venue" element={<Layout><VenueList /></Layout>} />
-            <Route path="/venue/add" element={<Layout><AddVenue /></Layout>} />
-            <Route path="/venue/edit/:id" element={<Layout><EditVenue /></Layout>} />
-            <Route path="/booking" element={<Layout><Bookings /></Layout>} />
-            <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
+            <Route path="/venue" element={<ProtectedVendorRoute><Layout><VenueList /></Layout></ProtectedVendorRoute>} />
+            <Route path="/venue/add" element={<ProtectedVendorRoute><Layout><AddVenue /></Layout></ProtectedVendorRoute>} />
+            <Route path="/venue/edit/:id" element={<ProtectedVendorRoute><Layout><EditVenue /></Layout></ProtectedVendorRoute>} />
+            <Route path="/booking" element={<ProtectedVendorRoute><Layout><Bookings /></Layout></ProtectedVendorRoute>} />
+            <Route path="/calendar" element={<ProtectedVendorRoute><Layout><CalendarPage /></Layout></ProtectedVendorRoute>} />
 
             {/* Subscription & Billing */}
-            <Route path="/billing" element={<Layout><SubscriptionDashboard /></Layout>} />
-            <Route path="/vendor/pricing" element={<Layout><PricingPage /></Layout>} />
+            <Route path="/billing" element={<ProtectedVendorRoute><Layout><SubscriptionDashboard /></Layout></ProtectedVendorRoute>} />
+            <Route path="/vendor/pricing" element={<ProtectedVendorRoute><Layout><PricingPage /></Layout></ProtectedVendorRoute>} />
 
             {/* Payment History (existing - all types) */}
-            <Route path="/payments" element={<Layout><PaymentHistory /></Layout>} />
+            <Route path="/payments" element={<ProtectedVendorRoute><Layout><PaymentHistory /></Layout></ProtectedVendorRoute>} />
 
             {/* Terms & Conditions */}
-            <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+            <Route path="/terms" element={<ProtectedVendorRoute><Layout><TermsPage /></Layout></ProtectedVendorRoute>} />
 
             {/* Blogs */}
-            <Route path="/blogs" element={<Layout><Blogs /></Layout>} />
+            <Route path="/blogs" element={<ProtectedVendorRoute><Layout><Blogs /></Layout></ProtectedVendorRoute>} />
 
 
             {/* Vendor Reviews */}
-            <Route path="/reviews" element={<Layout><VendorReviews /></Layout>} />
+            <Route path="/reviews" element={<ProtectedVendorRoute><Layout><VendorReviews /></Layout></ProtectedVendorRoute>} />
 
             {/* Vendor Complaints */}
-            <Route path="/complaints" element={<Layout><VendorComplaints /></Layout>} />
+            <Route path="/complaints" element={<ProtectedVendorRoute><Layout><VendorComplaints /></Layout></ProtectedVendorRoute>} />
 
             {/* Vendor Reports */}
-            <Route path="/reports" element={<Layout><VendorReports /></Layout>} />
+            <Route path="/reports" element={<ProtectedVendorRoute><Layout><VendorReports /></Layout></ProtectedVendorRoute>} />
 
             {/* Admin Routes */}
-            <Route path="/admin/venues" element={<Layout><ManageVenues /></Layout>} />
-            <Route path="/admin/plans" element={<Layout><PlansManagement /></Layout>} />
-            <Route path="/admin/reviews" element={<Layout><AdminReviews /></Layout>} />
-            <Route path="/admin/complaints" element={<Layout><AdminComplaints /></Layout>} />
-            <Route path="/admin/reports" element={<Layout><AdminReports /></Layout>} />
-            <Route path="/admin/bookings" element={<Layout><AdminBookings /></Layout>} />
-            <Route path="/admin/blogs" element={<Layout><AdminBlogs /></Layout>} />
+            <Route path="/admin/venues" element={<ProtectedVendorRoute><Layout><ManageVenues /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/plans" element={<ProtectedVendorRoute><Layout><PlansManagement /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/reviews" element={<ProtectedVendorRoute><Layout><AdminReviews /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/complaints" element={<ProtectedVendorRoute><Layout><AdminComplaints /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/reports" element={<ProtectedVendorRoute><Layout><AdminReports /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/bookings" element={<ProtectedVendorRoute><Layout><AdminBookings /></Layout></ProtectedVendorRoute>} />
+            <Route path="/admin/blogs" element={<ProtectedVendorRoute><Layout><AdminBlogs /></Layout></ProtectedVendorRoute>} />
           </Route>
         </Route>
 

@@ -78,14 +78,17 @@ export default function VendorReviews() {
         fetchReviewsData();
     }, [fetchReviewsData]);
 
-    const renderStars = (rating: number, size = 14) => {
+    const renderStars = (rating: number, sizeOrClass: number | string = 14) => {
+        const isClass = typeof sizeOrClass === "string";
         return (
             <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
                     <Star
                         key={i}
-                        size={size}
-                        className={i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}
+                        size={isClass ? undefined : (sizeOrClass as number)}
+                        className={isClass ? `${sizeOrClass} ${
+                            i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200"
+                        }` : (i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-200")}
                     />
                 ))}
             </div>
@@ -107,65 +110,61 @@ export default function VendorReviews() {
 
             {/* Analytics Section */}
             {analytics && (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
                     {/* Overall Vendor Rating */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110 duration-500"></div>
-                        <p className="text-slate-400 font-semibold uppercase tracking-wider text-xs mb-4">Vendor Rating</p>
-                        <div className="flex flex-col items-center gap-1">
-                            <h2 className="text-6xl font-black text-slate-800 tabular-nums leading-none">{analytics.averageRating}</h2>
-                            <div className="mt-4">
-                                {renderStars(analytics.averageRating, 20)}
+                    <div className="bg-white p-3 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-yellow-50 rounded-full -mr-8 -mt-8 sm:-mr-12 sm:-mt-12 transition-transform group-hover:scale-110 duration-500"></div>
+                        <p className="text-slate-400 font-semibold uppercase tracking-wider text-[8px] sm:text-[10px] md:text-xs mb-2 sm:mb-4">Vendor Rating</p>
+                        <div className="flex flex-col items-center gap-0.5 sm:gap-1">
+                            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-800 tabular-nums leading-none">{analytics.averageRating}</h2>
+                            <div className="mt-2 sm:mt-4">
+                                {renderStars(analytics.averageRating, "w-2.5 h-2.5 sm:w-4 sm:h-4 md:w-5 md:h-5")}
                             </div>
                         </div>
-                        <p className="text-sm text-slate-400 mt-6 font-medium">Global average score</p>
+                        <p className="text-[9px] sm:text-xs md:text-sm text-slate-400 mt-4 sm:mt-6 font-medium">Global average score</p>
                     </div>
 
-                    <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Rating Distribution */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                            <p className="text-slate-800 font-bold mb-6 flex items-center gap-2">
-                                <Filter size={18} className="text-indigo-500" />
-                                Score Distribution
-                            </p>
-                            <div className="space-y-3">
-                                {[5, 4, 3, 2, 1].map(star => {
-                                    const count = analytics.distribution[star] || 0;
-                                    const percentage = analytics.totalReviews > 0 ? (count / analytics.totalReviews) * 100 : 0;
-                                    return (
-                                        <div key={star} className="flex items-center gap-4 text-sm">
-                                            <div className="flex items-center gap-1 w-12 shrink-0">
-                                                <span className="font-bold text-slate-700">{star}</span>
-                                                <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                                            </div>
-                                            <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${percentage}%` }}
-                                                    transition={{ duration: 1, ease: "easeOut" }}
-                                                    className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full"
-                                                />
-                                            </div>
-                                            <div className="w-10 text-right font-semibold text-slate-500 tabular-nums">{count}</div>
+                    {/* Rating Distribution */}
+                    <div className="bg-white p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 lg:col-span-2">
+                        <p className="text-slate-800 font-bold mb-3 sm:mb-6 flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm md:text-base">
+                            <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-[18px] md:h-[18px] text-indigo-500" />
+                            Score Distribution
+                        </p>
+                        <div className="space-y-1.5 sm:space-y-3">
+                            {[5, 4, 3, 2, 1].map(star => {
+                                const count = analytics.distribution[star] || 0;
+                                const percentage = analytics.totalReviews > 0 ? (count / analytics.totalReviews) * 100 : 0;
+                                return (
+                                    <div key={star} className="flex items-center gap-2 sm:gap-4 text-[9px] sm:text-xs md:text-sm">
+                                        <div className="flex items-center gap-0.5 sm:gap-1 w-6 sm:w-12 shrink-0">
+                                            <span className="font-bold text-slate-700">{star}</span>
+                                            <Star className="text-yellow-400 fill-yellow-400 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                        <div className="flex-1 h-2 sm:h-3 bg-slate-100 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, ease: "easeOut" }}
+                                                className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full"
+                                            />
+                                        </div>
+                                        <div className="w-6 sm:w-10 text-right font-semibold text-slate-500 tabular-nums">{count}</div>
+                                    </div>
+                                );
+                            })}
                         </div>
+                    </div>
 
-                        {/* Summary Metrics */}
-                        <div className="grid grid-cols-1 gap-6">
-                            <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-3xl shadow-lg shadow-indigo-200 text-white flex flex-col justify-between">
-                                <p className="font-medium opacity-80">Total Reviews Received</p>
-                                <div className="flex items-baseline gap-2 mt-4">
-                                    <h2 className="text-5xl font-black">{analytics.totalReviews}</h2>
-                                    <span className="text-indigo-200 font-medium">Feedbacks</span>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-sm">
-                                    <span>Verified responses</span>
-                                    <ArrowUpDown size={16} className="opacity-50" />
-                                </div>
-                            </div>
+                    {/* Summary Metrics */}
+                    <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-lg shadow-indigo-200 text-white flex flex-col justify-between">
+                        <p className="font-medium opacity-80 text-[9px] sm:text-xs md:text-sm">Total Reviews Received</p>
+                        <div className="flex items-baseline gap-1 mt-2 sm:mt-4">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black">{analytics.totalReviews}</h2>
+                            <span className="text-indigo-200 font-medium text-[9px] sm:text-xs md:text-sm">Feedbacks</span>
+                        </div>
+                        <div className="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-white/10 flex justify-between items-center text-[9px] sm:text-xs md:text-sm">
+                            <span>Verified responses</span>
+                            <ArrowUpDown className="w-3 h-3 sm:w-4 sm:h-4 opacity-50" />
                         </div>
                     </div>
                 </div>

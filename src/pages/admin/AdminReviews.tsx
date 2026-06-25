@@ -26,7 +26,7 @@ export default function AdminReviews() {
         setLoading(true);
         try {
             const token = localStorage.getItem("token") || "";
-            const res = await axios.get("http://localhost:3000/admin/reviews", {
+            const res = await axios.get("http://192.168.1.12:3000/admin/reviews", {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { page, limit: pagination.limit, search }
             });
@@ -55,8 +55,8 @@ export default function AdminReviews() {
     const updateStatus = async (venueId: string, reviewId: string, status: string) => {
         try {
             const token = localStorage.getItem("token") || "";
-            // await axios.patch(`http://localhost:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
-            await axios.patch(`http://localhost:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
+            // await axios.patch(`http://192.168.1.12:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
+            await axios.patch(`http://192.168.1.12:3000/admin/reviews/${venueId}/${reviewId}/status`, { status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(`Review ${status} successfully`);

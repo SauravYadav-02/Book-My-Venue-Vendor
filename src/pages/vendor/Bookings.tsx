@@ -25,10 +25,28 @@ import { currencyFormatter } from "../../utils/currency";
 
 // ── Status Badge ─────────────────────────────────────────────────────
 const PaymentStatusBadge = ({
-  status,
+  booking,
 }: {
-  status: "pending" | "success" | "failed" | "cancelled";
+  booking: VendorPaymentBooking;
 }) => {
+  const status = booking.paymentStatus;
+  if (status === "cancelled") {
+    const refundStatus = booking.cancellation?.refundStatus;
+    if (refundStatus === "pending") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 animate-pulse">
+          <Clock size={13} /> Refund Pending
+        </span>
+      );
+    } else if (refundStatus === "processed") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+          <CheckCircle2 size={13} /> Refund Processed
+        </span>
+      );
+    }
+  }
+
   const config = {
     success: {
       icon: <CheckCircle2 size={13} />,
@@ -76,14 +94,14 @@ const SummaryCard = ({
   sub?: string;
   iconBg: string;
 }) => (
-  <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+    <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
       {icon}
     </div>
-    <div className="min-w-0">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-xl font-bold text-[#2d2d2d] mt-0.5 truncate">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div className="min-w-0 w-full">
+      <p className="text-[9px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider leading-tight">{label}</p>
+      <p className="text-sm sm:text-base md:text-xl font-bold text-[#2d2d2d] mt-0.5 sm:mt-1 truncate" title={value}>{value}</p>
+      {sub && <p className="text-[9px] sm:text-xs text-gray-400 mt-0.5 leading-tight">{sub}</p>}
     </div>
   </div>
 );
@@ -203,28 +221,28 @@ const Bookings = () => {
       {/* ── Summary Stats ────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
-          icon={<TrendingUp size={22} className="text-violet-600" />}
+          icon={<TrendingUp className="text-violet-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-violet-50"
           label="Total Revenue"
           value={currencyFormatter.format(totalRevenue)}
           sub={`${bookings.length} booking${bookings.length !== 1 ? "s" : ""}`}
         />
         <SummaryCard
-          icon={<Wallet size={22} className="text-emerald-600" />}
+          icon={<Wallet className="text-emerald-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-emerald-50"
           label="Collected (20%)"
           value={currencyFormatter.format(totalCollected)}
           sub={`${paidCount} paid`}
         />
         <SummaryCard
-          icon={<IndianRupee size={22} className="text-amber-600" />}
+          icon={<IndianRupee className="text-amber-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-amber-50"
           label="Outstanding (80%)"
           value={currencyFormatter.format(totalPending)}
           sub="Due at events"
         />
         <SummaryCard
-          icon={<AlertCircle size={22} className="text-red-500" />}
+          icon={<AlertCircle className="text-red-500 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-red-50"
           label="Failed / Pending"
           value={`${failedCount + pendingCount}`}
@@ -263,7 +281,7 @@ const Bookings = () => {
 
         {/* ── Table ────────────────────────────────────────────────────── */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[900px] text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="py-3.5 px-5 font-semibold text-xs text-gray-400 uppercase tracking-wider">
@@ -371,14 +389,26 @@ const Bookings = () => {
                               : "text-gray-400"
                           }`}
                         >
-                          {booking.paymentStatus === "cancelled" ? "—" : currencyFormatter.format(booking.remainingAmount)}
+                          {currencyFormatter.format(booking.paymentStatus === "cancelled" ? 0 : booking.remainingAmount)}
                         </span>
                       </td>
 
                       {/* Payment Status */}
-                      <td className="py-4 px-5 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          <PaymentStatusBadge status={booking.paymentStatus} />
+                      <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col items-center gap-2">
+                          <PaymentStatusBadge booking={booking} />
+                          {booking.cancellation?.refundStatus === "pending" && (
+                            <button
+                              onClick={() => handleRefundProcess(booking.bookingId)}
+                              disabled={refundingId === booking.bookingId}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[10px] tracking-wider uppercase transition-colors shadow-sm cursor-pointer border-none flex items-center gap-1"
+                            >
+                              {refundingId === booking.bookingId ? (
+                                <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : null}
+                              Process
+                            </button>
+                          )}
                           {booking.transactionId && isPaid && (
                             <span className="text-[10px] font-mono text-gray-400 hidden group-hover:block">
                               {booking.transactionId.slice(0, 18)}…

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
-import { Clock, AlertTriangle, CheckCircle, Package, Sparkles, Layers, ShieldCheck } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle, Package, Sparkles, Layers, ShieldCheck, X } from "lucide-react";
 import { currencyFormatter } from "../../utils/currency";
 import toast from "react-hot-toast";
 
 export default function SubscriptionDashboard() {
   const { availablePlans, currentSubscription, addons, queue, loading, refreshData, createPayment, confirmSubscription, planLimits, venueUsage } = useSubscription();
   const [processing, setProcessing] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
 
   // Fetch vendor ID precisely as stored by LoginPage.tsx
   const vendorId = localStorage.getItem("vendorId") || "";
@@ -233,11 +234,12 @@ export default function SubscriptionDashboard() {
             No regular subscription plans currently available.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {regularPlans.map((plan) => (
               <div
                 key={plan._id}
-                className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col relative overflow-hidden"
+                onClick={() => setSelectedPlan(plan)}
+                className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6 shadow-sm hover:shadow-md hover:border-brand-primary/30 transition-all duration-200 bg-white flex flex-col relative overflow-hidden cursor-pointer"
               >
                 {plan.name.toLowerCase().includes("pro") && (
                   <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-brand-primary to-green-500" />
@@ -245,45 +247,48 @@ export default function SubscriptionDashboard() {
 
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 mt-1">
+                    <h3 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 leading-tight">{plan.name}</h3>
+                    <span className="inline-block px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gray-100 text-gray-800 mt-1">
                       Base Plan
                     </span>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Access</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">{plan.duration_days} Days Access</p>
 
-                <div className="mt-4 mb-6">
-                  <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
+                <div className="mt-2 sm:mt-4 mb-4 sm:mb-6">
+                  <span className="text-xl sm:text-2xl md:text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
                 </div>
 
                 {/* Plan limits block */}
-                <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Plan Limits</div>
-                  <div className="text-sm text-slate-700 flex justify-between">
+                <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1 sm:space-y-1.5 hidden md:block">
+                  <div className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Plan Limits</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 flex justify-between gap-1">
                     <span>Max Venues:</span>
                     <span className="font-bold">{plan.maxVenues || 0}</span>
                   </div>
-                  <div className="text-sm text-slate-700 flex justify-between">
-                    <span>Max Photos / Venue:</span>
-                    <span className="font-bold">{plan.maxPhotos || 0}</span>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 flex justify-between gap-1">
+                    <span className="truncate" title="Max Photos / Venue">Max Photos/Venue:</span>
+                    <span className="font-bold shrink-0">{plan.maxPhotos || 0}</span>
                   </div>
                 </div>
 
-                <ul className="space-y-3 mb-8 flex-1">
+                <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 md:mb-8 flex-1 hidden md:block">
                   {plan.features?.map((feature, i) => (
-                    <li key={i} className="flex items-start text-sm text-gray-600">
-                      <CheckCircle className="text-brand-primary mr-2 shrink-0 mt-0.5" size={16} />
-                      {feature}
+                    <li key={i} className="flex items-start text-[10px] sm:text-xs md:text-sm text-gray-600">
+                      <CheckCircle className="text-brand-primary mr-1.5 sm:mr-2 shrink-0 mt-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="leading-tight">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  onClick={() => handleBuyPlan(plan._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBuyPlan(plan._id);
+                  }}
                   disabled={processing === plan._id}
-                  className="w-full py-3 px-4 bg-brand-primary hover:bg-brand-light disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none"
+                  className="w-full py-2 sm:py-3 px-2 sm:px-4 bg-brand-primary hover:bg-brand-light disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none text-xs sm:text-sm"
                 >
                   {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now")}
                 </button>
@@ -310,80 +315,84 @@ export default function SubscriptionDashboard() {
             No optional add-on upgrades currently available.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {addonPlans.map((plan) => (
               <div
                 key={plan._id}
-                className="border border-indigo-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-b from-indigo-50/20 to-white flex flex-col relative overflow-hidden"
+                onClick={() => setSelectedPlan(plan)}
+                className="border border-indigo-100 rounded-2xl p-3 sm:p-4 md:p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 bg-gradient-to-b from-indigo-50/20 to-white flex flex-col relative overflow-hidden cursor-pointer"
               >
                 <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
 
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 mt-1">
+                    <h3 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 leading-tight">{plan.name}</h3>
+                    <span className="inline-block px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-indigo-100 text-indigo-800 mt-1">
                       Upgrade Pack
                     </span>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-500 mt-1">{plan.duration_days} Days Validity</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">{plan.duration_days} Days Validity</p>
 
-                <div className="mt-4 mb-6">
-                  <span className="text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
+                <div className="mt-2 sm:mt-4 mb-4 sm:mb-6">
+                  <span className="text-xl sm:text-2xl md:text-4xl font-extrabold text-gray-900">{currencyFormatter.format(plan.price)}</span>
                 </div>
 
                 {/* Parent plan / complement relationship */}
                 {plan.parentPlanId ? (
-                  <div className="mb-4 p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl">
-                    <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-                      <Sparkles size={12} /> Complements Base Plan
+                  <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl hidden md:block">
+                    <div className="text-[9px] sm:text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Sparkles size={12} className="shrink-0 w-3 h-3" /> <span className="truncate">Complements Base Plan</span>
                     </div>
-                    <p className="text-xs text-indigo-700">
+                    <p className="text-[10px] sm:text-xs text-indigo-700 leading-tight">
                       Enhances your active <strong className="font-bold text-indigo-900">{typeof plan.parentPlanId === "object" && plan.parentPlanId ? plan.parentPlanId.name : "matching"}</strong> plan.
                     </p>
                   </div>
                 ) : (
-                  <div className="mb-4 p-3 bg-emerald-50/50 border border-emerald-100/50 rounded-xl">
-                    <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-                      <Layers size={12} /> Universal Upgrade
+                  <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-emerald-50/50 border border-emerald-100/50 rounded-xl hidden md:block">
+                    <div className="text-[9px] sm:text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Layers size={12} className="shrink-0 w-3 h-3" /> <span className="truncate">Universal Upgrade</span>
                     </div>
-                    <p className="text-xs text-emerald-700">
+                    <p className="text-[10px] sm:text-xs text-emerald-700 leading-tight">
                       Compatible with any active base subscription.
                     </p>
                   </div>
                 )}
 
                 {/* Plan limits block */}
-                <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Upgrade Features</div>
+                <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1 sm:space-y-1.5 hidden md:block">
+                  <div className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Upgrade Features</div>
                   {plan.maxVenues && plan.maxVenues > 0 ? (
-                    <div className="text-sm text-slate-700 flex justify-between">
-                      <span>Extra Venues Allowed:</span>
-                      <span className="font-bold text-indigo-600">+{plan.maxVenues}</span>
+                    <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 flex justify-between gap-1">
+                      <span className="truncate" title="Extra Venues Allowed">Extra Venues:</span>
+                      <span className="font-bold text-indigo-600 shrink-0">+{plan.maxVenues}</span>
                     </div>
                   ) : null}
                   {plan.maxPhotos && plan.maxPhotos > 0 ? (
-                    <div className="text-sm text-slate-700 flex justify-between">
-                      <span>Extra Photos / Venue:</span>
-                      <span className="font-bold text-indigo-600">+{plan.maxPhotos}</span>
+                    <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 flex justify-between gap-1">
+                      <span className="truncate" title="Extra Photos / Venue">Extra Photos/Venue:</span>
+                      <span className="font-bold text-indigo-600 shrink-0">+{plan.maxPhotos}</span>
                     </div>
                   ) : null}
                 </div>
 
-                <ul className="space-y-3 mb-8 flex-1">
+                <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 md:mb-8 flex-1 hidden md:block">
                   {plan.features?.map((feature, i) => (
-                    <li key={i} className="flex items-start text-sm text-gray-600">
-                      <CheckCircle className="text-indigo-500 mr-2 shrink-0 mt-0.5" size={16} />
-                      {feature}
+                    <li key={i} className="flex items-start text-[10px] sm:text-xs md:text-sm text-gray-600">
+                      <CheckCircle className="text-indigo-500 mr-1.5 sm:mr-2 shrink-0 mt-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="leading-tight">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  onClick={() => handleBuyPlan(plan._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBuyPlan(plan._id);
+                  }}
                   disabled={processing === plan._id}
-                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none shadow-sm shadow-indigo-100"
+                  className="w-full py-2 sm:py-3 px-2 sm:px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none shadow-sm shadow-indigo-100 text-xs sm:text-sm"
                 >
                   {processing === plan._id ? "Processing..." : (currentSubscription && currentSubscription.status !== "expired" ? "Purchase Add-on" : "Activate Add-on")}
                 </button>
@@ -392,6 +401,138 @@ export default function SubscriptionDashboard() {
           </div>
         )}
       </section>
+
+      {/* --- Plan Detail Modal --- */}
+      {selectedPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-start">
+              <div>
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mb-2 ${
+                  selectedPlan.planType === "addon" ? "bg-indigo-100 text-indigo-800" : "bg-gray-100 text-gray-800"
+                }`}>
+                  {selectedPlan.planType === "addon" ? "Upgrade Pack" : "Base Plan"}
+                </span>
+                <h3 className="text-xl font-bold text-gray-900">{selectedPlan.name}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedPlan(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-50 transition-colors cursor-pointer border-none bg-transparent"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6 overflow-y-auto flex-1">
+              <div>
+                <span className="text-gray-500 text-sm">{selectedPlan.duration_days} Days Validity</span>
+                <div className="text-3xl font-extrabold text-gray-900 mt-1">
+                  {currencyFormatter.format(selectedPlan.price)}
+                </div>
+              </div>
+
+              {/* Complement logic for Addons */}
+              {selectedPlan.planType === "addon" && (
+                selectedPlan.parentPlanId ? (
+                  <div className="p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl">
+                    <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Sparkles size={12} /> Complements Base Plan
+                    </div>
+                    <p className="text-xs text-indigo-700">
+                      Enhances your active <strong className="font-bold text-indigo-900">{typeof selectedPlan.parentPlanId === "object" && selectedPlan.parentPlanId ? selectedPlan.parentPlanId.name : "matching"}</strong> plan.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-emerald-50/50 border border-emerald-100/50 rounded-xl">
+                    <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Layers size={12} /> Universal Upgrade
+                    </div>
+                    <p className="text-xs text-emerald-700">
+                      Compatible with any active base subscription.
+                    </p>
+                  </div>
+                )
+              )}
+
+              {/* Plan Limits block */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2.5">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {selectedPlan.planType === "addon" ? "Upgrade Features" : "Plan Limits"}
+                </h4>
+                {selectedPlan.planType === "addon" ? (
+                  <>
+                    {selectedPlan.maxVenues && selectedPlan.maxVenues > 0 ? (
+                      <div className="text-sm text-slate-700 flex justify-between">
+                        <span>Extra Venues Allowed:</span>
+                        <span className="font-bold text-indigo-600">+{selectedPlan.maxVenues}</span>
+                      </div>
+                    ) : null}
+                    {selectedPlan.maxPhotos && selectedPlan.maxPhotos > 0 ? (
+                      <div className="text-sm text-slate-700 flex justify-between">
+                        <span>Extra Photos / Venue:</span>
+                        <span className="font-bold text-indigo-600">+{selectedPlan.maxPhotos}</span>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <div className="text-sm text-slate-700 flex justify-between">
+                      <span>Max Venues Allowed:</span>
+                      <span className="font-bold text-slate-900">{selectedPlan.maxVenues || 0}</span>
+                    </div>
+                    <div className="text-sm text-slate-700 flex justify-between">
+                      <span>Max Photos / Venue:</span>
+                      <span className="font-bold text-slate-900">{selectedPlan.maxPhotos || 0}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Full Features List */}
+              {selectedPlan.features && selectedPlan.features.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Features Included</h4>
+                  <ul className="space-y-3">
+                    {selectedPlan.features.map((feature: string, i: number) => (
+                      <li key={i} className="flex items-start text-sm text-gray-600">
+                        <CheckCircle className={`mr-2.5 shrink-0 mt-0.5 ${
+                          selectedPlan.planType === "addon" ? "text-indigo-500" : "text-brand-primary"
+                        }`} size={16} />
+                        <span className="leading-normal">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer (Action Button) */}
+            <div className="p-6 bg-gray-50 border-t border-gray-100">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBuyPlan(selectedPlan._id);
+                  setSelectedPlan(null);
+                }}
+                disabled={processing === selectedPlan._id}
+                className={`w-full py-3 px-4 text-white rounded-xl font-semibold transition-colors flex justify-center items-center cursor-pointer border-none shadow-sm ${
+                  selectedPlan.planType === "addon"
+                    ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100"
+                    : "bg-brand-primary hover:bg-brand-light"
+                }`}
+              >
+                {processing === selectedPlan._id ? "Processing..." : (
+                  selectedPlan.planType === "addon"
+                    ? (currentSubscription && currentSubscription.status !== "expired" ? "Purchase Add-on" : "Activate Add-on")
+                    : (currentSubscription && currentSubscription.status !== "expired" ? "Add to Queue" : "Activate Now")
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

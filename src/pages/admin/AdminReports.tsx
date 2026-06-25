@@ -115,11 +115,11 @@ export default function AdminReports() {
   });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="flex flex-col h-[calc(100vh-170px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans overflow-hidden">
       <Toaster />
 
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 tracking-tight">Venue Reports Administration</h1>
           <p className="text-sm text-stone-500 mt-1">Review confidential platform reports, verify policy violations, and manage resolutions privately.</p>
@@ -156,15 +156,15 @@ export default function AdminReports() {
       </div>
 
       {/* Main Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-[450px]">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-0">
 
         {/* Reports List Side */}
-        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full ${selectedReport ? "hidden lg:flex" : "flex"}`}>
-          <div className="p-4 border-b border-stone-100 bg-stone-50/30">
+        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full overflow-hidden ${selectedReport ? "hidden lg:flex" : "flex"}`}>
+          <div className="p-4 border-b border-stone-100 bg-stone-50/30 shrink-0">
             <h2 className="text-xs font-bold uppercase tracking-widest text-stone-400">All Private Reports ({filteredReports.length})</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 max-h-[600px]">
+          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 min-h-0">
             {listLoading ? (
               <div className="p-8 text-center text-stone-400 text-sm">Loading private reports...</div>
             ) : filteredReports.length === 0 ? (
@@ -194,9 +194,9 @@ export default function AdminReports() {
         </div>
 
         {/* Details Panel */}
-        <div className={`lg:col-span-8 flex flex-col h-full ${!selectedReport ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
+        <div className={`lg:col-span-8 flex flex-col h-full overflow-hidden ${!selectedReport ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
           {selectedReport ? (
-            <div className="flex flex-col h-full min-h-[450px]">
+            <div className="flex flex-col h-full min-h-0">
 
               {/* Mobile Back / Header */}
               <div className="p-4 border-b border-stone-200 flex items-center justify-between gap-4 bg-stone-50/30">

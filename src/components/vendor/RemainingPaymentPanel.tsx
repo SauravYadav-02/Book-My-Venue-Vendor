@@ -44,7 +44,7 @@ export const RemainingPaymentPanel: React.FC<RemainingPaymentPanelProps> = ({
     try {
       const vendorId = localStorage.getItem("vendorId");
       const res = await axios.get(
-        `http://localhost:3000/api/remaining-payment/vendor/booking/${bookingId}/transactions`,
+        `http://192.168.1.12:3000/api/remaining-payment/vendor/booking/${bookingId}/transactions`,
         {
           headers: { vendorid: vendorId },
         }
@@ -81,7 +81,7 @@ export const RemainingPaymentPanel: React.FC<RemainingPaymentPanelProps> = ({
     try {
       const vendorId = localStorage.getItem("vendorId");
       const res = await axios.post(
-        `http://localhost:3000/api/remaining-payment/vendor/log/${bookingId}`,
+        `http://192.168.1.12:3000/api/remaining-payment/vendor/log/${bookingId}`,
         { amount: parsedAmount, method, note },
         { headers: { vendorid: vendorId } }
       );

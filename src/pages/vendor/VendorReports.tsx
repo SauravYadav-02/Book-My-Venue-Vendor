@@ -68,11 +68,11 @@ export default function VendorReports() {
   });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-gray-50 p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="flex flex-col h-[calc(100vh-170px)] bg-gray-50 p-4 sm:p-6 lg:p-8 font-sans overflow-hidden">
       <Toaster />
 
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Venue Policy Reports</h1>
           <p className="text-sm text-gray-500 mt-1">Monitor complaints, user reports, and administrative decisions concerning your venues.</p>
@@ -109,15 +109,15 @@ export default function VendorReports() {
       </div>
 
       {/* Main Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-gray-200/80 shadow-sm overflow-hidden min-h-[450px]">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-gray-200/80 shadow-sm overflow-hidden min-h-0">
 
         {/* Reports List Side */}
-        <div className={`lg:col-span-4 border-r border-gray-200 flex flex-col h-full ${selectedReport ? "hidden lg:flex" : "flex"}`}>
-          <div className="p-4 border-b border-gray-150 bg-gray-50/50">
+        <div className={`lg:col-span-4 border-r border-gray-200 flex flex-col h-full overflow-hidden ${selectedReport ? "hidden lg:flex" : "flex"}`}>
+          <div className="p-4 border-b border-gray-150 bg-gray-50/50 shrink-0">
             <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">Reports Filed against You ({filteredReports.length})</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 max-h-[600px] scrollbar-thin">
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 min-h-0 scrollbar-thin">
             {listLoading ? (
               <div className="p-8 text-center text-gray-400 text-sm">Loading reports list...</div>
             ) : filteredReports.length === 0 ? (
@@ -147,9 +147,9 @@ export default function VendorReports() {
         </div>
 
         {/* Details Panel */}
-        <div className={`lg:col-span-8 flex flex-col h-full ${!selectedReport ? "hidden lg:flex items-center justify-center bg-gray-50/20" : "flex"}`}>
+        <div className={`lg:col-span-8 flex flex-col h-full overflow-hidden ${!selectedReport ? "hidden lg:flex items-center justify-center bg-gray-50/20" : "flex"}`}>
           {selectedReport ? (
-            <div className="flex flex-col h-full min-h-[450px]">
+            <div className="flex flex-col h-full min-h-0">
 
               {/* Header */}
               <div className="p-4 border-b border-gray-200 flex items-center justify-between gap-4 bg-gray-50/50">

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/complaints";
+const BASE_URL = "http://192.168.1.12:3000/complaints";
 
 export interface Complaint {
   _id: string;
@@ -67,7 +67,7 @@ export const assignComplaint = async (id: string, adminId: string, vendorId: str
 
 // 4.5 Fetch all vendors (Admin only - for assignment list)
 export const getAllVendorsAdmin = async (adminId: string): Promise<any[]> => {
-  const res = await axios.get("http://localhost:3000/vendors", {
+  const res = await axios.get("http://192.168.1.12:3000/vendors", {
     headers: { adminid: adminId },
     params: { limit: 100 }
   });

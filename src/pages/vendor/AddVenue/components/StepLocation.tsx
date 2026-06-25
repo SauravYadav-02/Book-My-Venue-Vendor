@@ -44,7 +44,7 @@ function StepLocation({
                         <Label required>ZIP code</Label>
                         <InputField
                             id="zip" value={form.zip} placeholder="e.g. 62701"
-                            onChange={(v) => update("zip", v)}
+                            onChange={(v) => update("zip", v)} error={errors.zip}
                         />
                     </div>
                     <div className="flex flex-col gap-1 sm:gap-1.5">

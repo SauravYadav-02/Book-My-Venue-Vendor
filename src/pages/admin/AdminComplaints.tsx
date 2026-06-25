@@ -25,6 +25,15 @@ import {
   ArrowLeft
 } from "lucide-react";
 
+const getInitials = (name?: string) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0].slice(0, 2).toUpperCase();
+};
+
 export default function AdminComplaints() {
   const adminId = localStorage.getItem("adminId") || "";
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -176,11 +185,11 @@ export default function AdminComplaints() {
   });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="flex flex-col h-[calc(100vh-170px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans overflow-hidden">
       <Toaster />
 
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 tracking-tight">Customer Complaints Administration</h1>
           <p className="text-sm text-stone-500 mt-1">Review all system support tickets, manage vendor assignments, override status lifecycles, and mediate discussions.</p>
@@ -205,15 +214,15 @@ export default function AdminComplaints() {
       </div>
 
       {/* Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-[450px]">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-0">
 
         {/* Complaints List Side */}
-        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full ${selectedComplaint ? "hidden lg:flex" : "flex"}`}>
-          <div className="p-4 border-b border-stone-100 bg-stone-50/30">
+        <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full overflow-hidden ${selectedComplaint ? "hidden lg:flex" : "flex"}`}>
+          <div className="p-4 border-b border-stone-100 bg-stone-50/30 shrink-0">
             <h2 className="text-xs font-bold uppercase tracking-widest text-stone-400">All Ticket Logs ({filteredComplaints.length})</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 max-h-[600px]">
+          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-stone-100 min-h-0">
             {listLoading ? (
               <div className="p-8 text-center text-stone-400 text-sm">Loading logs...</div>
             ) : filteredComplaints.length === 0 ? (
@@ -243,9 +252,9 @@ export default function AdminComplaints() {
         </div>
 
         {/* Details & Thread Panel */}
-        <div className={`lg:col-span-8 flex flex-col h-full ${!selectedComplaint ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
+        <div className={`lg:col-span-8 flex flex-col h-full overflow-hidden ${!selectedComplaint ? "hidden lg:flex items-center justify-center bg-stone-50/20" : "flex"}`}>
           {selectedComplaint ? (
-            <div className="flex flex-col h-full min-h-[450px]">
+            <div className="flex flex-col h-full min-h-0">
 
               {/* Mobile Back / Header */}
               <div className="p-4 border-b border-stone-200 flex items-center justify-between gap-4 bg-stone-50/30">
@@ -356,10 +365,8 @@ export default function AdminComplaints() {
                   )}
                 </div>
 
-              </div>
-
-              {/* Chat Messages */}
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[250px] bg-stone-50/20">
+              </div>              {/* Chat Messages */}
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 min-h-0 bg-stone-50/20">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8 text-stone-400">
                     <MessageSquare size={32} className="mb-1 text-stone-300" />
@@ -368,22 +375,55 @@ export default function AdminComplaints() {
                 ) : (
                   messages.map((msg) => {
                     const isOwn = msg.senderId === adminId;
+                    const isVendorMsg = msg.senderModel === "Vendor";
+                    
                     return (
-                      <div key={msg._id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                      <div key={msg._id} className={`flex items-start gap-2.5 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                        {/* Avatar */}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 shadow-sm ${
                           isOwn
-                            ? "bg-stone-800 text-white rounded-br-none"
-                            : "bg-white border border-stone-200/70 text-stone-800 rounded-bl-none"
+                            ? "bg-stone-800 text-stone-150"
+                            : isVendorMsg
+                              ? "bg-[#4a5043] text-[#f7f6f2]"
+                              : "bg-slate-200 text-slate-700"
                         }`}>
-                          <div className="flex items-center justify-between gap-4 mb-1">
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isOwn ? "text-stone-300" : "text-stone-400"}`}>
-                              {isOwn ? "You" : msg.senderName} ({msg.senderModel})
-                            </span>
-                            <span className={`text-[9px] ${isOwn ? "text-stone-400" : "text-stone-400"}`}>
+                          {getInitials(isOwn ? "You" : msg.senderName)}
+                        </div>
+
+                        {/* Message Bubble Column */}
+                        <div className={`flex flex-col max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
+                          {/* Sender name & time metadata */}
+                          <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-stone-400">
+                            {!isOwn ? (
+                              <>
+                                <span className="font-semibold text-stone-650">{msg.senderName}</span>
+                                <span className={`px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider rounded-full border ${
+                                  isVendorMsg 
+                                    ? "bg-stone-50 text-stone-705 border-stone-200" 
+                                    : "bg-stone-100 text-stone-600 border-stone-200"
+                                }`}>
+                                  {msg.senderModel}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-semibold text-stone-655">You</span>
+                            )}
+                            <span>•</span>
+                            <span>
                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p className="leading-relaxed whitespace-pre-line">{msg.message}</p>
+
+                          {/* Message Bubble itself */}
+                          <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm leading-relaxed whitespace-pre-line text-xs font-medium ${
+                            isOwn
+                              ? "bg-stone-800 text-white rounded-tr-none"
+                              : isVendorMsg
+                                ? "bg-[#4a5043]/10 border border-[#4a5043]/20 text-[#2c3226] rounded-tl-none"
+                                : "bg-white border border-stone-200/70 text-stone-800 rounded-tl-none"
+                          }`}>
+                            <p className="leading-relaxed whitespace-pre-line text-xs font-medium">{msg.message}</p>
+                          </div>
                         </div>
                       </div>
                     );
@@ -393,24 +433,24 @@ export default function AdminComplaints() {
 
               {/* Reply field */}
               <div className="p-4 border-t border-stone-200 bg-white">
-                <form onSubmit={handleSendMessage} className="flex gap-2">
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2 bg-stone-50/80 border border-stone-200 rounded-full pl-4 pr-1.5 py-1.5 focus-within:border-stone-500 focus-within:ring-1 focus-within:ring-stone-500/20 transition-all">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Intervene in thread as Administrator..."
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 outline-none text-sm text-stone-800 placeholder:text-stone-400 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 transition-all"
+                    className="flex-1 bg-transparent border-0 outline-none text-sm text-stone-800 placeholder:text-stone-400 focus:ring-0 focus:outline-none min-w-0"
                   />
                   <button
                     type="submit"
                     disabled={!newMessage.trim()}
-                    className="bg-stone-850 hover:bg-stone-900 disabled:bg-stone-200 disabled:cursor-not-allowed text-white p-2.5 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-95"
+                    className="bg-stone-800 hover:bg-stone-900 disabled:bg-stone-200 disabled:cursor-not-allowed text-white p-2.5 rounded-full flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
                   >
-                    <Send size={16} />
+                    <Send size={14} className="translate-x-[0.5px] -translate-y-[0.5px]" />
                   </button>
                 </form>
                 {selectedComplaint.status === "Closed" && (
-                  <p className="text-[10px] text-amber-600 font-semibold mt-1 flex items-center gap-1">
+                  <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
                     <AlertCircle size={10} /> Note: This complaint status is Closed, but Admin can still post responses.
                   </p>
                 )}

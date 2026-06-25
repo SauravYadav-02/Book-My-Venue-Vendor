@@ -2,8 +2,8 @@
 import axios, { AxiosError } from "axios";
 import type { VenueForm } from "../pages/vendor/AddVenue/types/Interface";
 
-// const API_URL = "http://localhost:3000";
-const API_URL = "http://localhost:3000";
+// const API_URL = "http://192.168.1.12:3000";
+const API_URL = "http://192.168.1.12:3000";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -23,6 +23,7 @@ export interface Venue {
     // ✅ Per-plate catering cost (veg / non-veg only)
     vegPrice?: number | null;
     nonVegPrice?: number | null;
+    bothPrice?: number | null;
 
     address?: string;
     city?: string;

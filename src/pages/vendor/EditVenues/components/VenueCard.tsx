@@ -37,8 +37,8 @@ export default function VenueCard({ venue, onEdit, onDelete, onDeactivate, onRea
     const getImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-        // const baseUrl = 'http://localhost:3000';
-        const baseUrl = 'http://localhost:3000';
+        // const baseUrl = 'http://192.168.1.12:3000';
+        const baseUrl = 'http://192.168.1.12:3000';
         return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
     };
 

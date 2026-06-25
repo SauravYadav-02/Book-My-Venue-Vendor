@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/blogs";
+const BASE_URL = "http://192.168.1.12:3000/blogs";
 const getVendorId = () => localStorage.getItem("vendorId") || "";
 
 export interface Blog {
@@ -17,6 +17,7 @@ export interface Blog {
   likes: string[];
   comments: any[];
   createdAt: string;
+  deleted?: boolean;
 }
 
 export const getMyBlogs = async (page = 1, limit = 10): Promise<{

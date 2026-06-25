@@ -15,7 +15,6 @@ import {
     Package,
     Star,
     History,
-    CreditCard,
     FileText,
     AlertCircle
 } from "lucide-react";
@@ -107,16 +106,21 @@ const SidebarItem = ({
     );
 };
 
+interface SidebarProps {
+    open?: boolean;
+    setOpen?: (o: boolean) => void;
+}
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-const Sidebar = () => {
+const Sidebar = ({ open: propsOpen, setOpen: propsSetOpen }: SidebarProps) => {
     const navigate = useNavigate();
     const { currentSubscription } = useSubscription();
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const { vendor } = useVendor();
-    const vendorName = vendor?.fullName || localStorage.getItem("username") || "Vendor Partner";
+    const vendorName = vendor?.fullName || localStorage.getItem("username") || "Vendor";
     
     const isAdminUser = !!localStorage.getItem("adminId");
-    const itemsToShow = isAdminUser ? [
+    const itemsToShow: Array<{ label: string; path: string; icon: ElementType; badge?: number }> = isAdminUser ? [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
         { label: "Bookings", path: "/admin/bookings", icon: CalendarDays },
         { label: "Venues", path: "/admin/venues", icon: ClipboardList },
@@ -129,17 +133,15 @@ const Sidebar = () => {
     ] : [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
         { label: "Listings", path: "/venue", icon: ClipboardList },
-        { label: "Bookings", path: "/booking", icon: CalendarDays, badge: 28 },
+        { label: "Bookings", path: "/booking", icon: CalendarDays },
         { label: "Calendar", path: "/calendar", icon: Calendar },
         { label: "Reviews", path: "/reviews", icon: Star },
         { label: "Complaints", path: "/complaints", icon: HelpCircle },
         { label: "Reports", path: "/reports", icon: AlertCircle },
         { label: "Billing", path: "/billing", icon: Package },
         { label: "Payments", path: "/payments", icon: History },
-        { label: "Sub Payments", path: "/subscription-payments", icon: CreditCard },
         { label: "Terms & Conditions", path: "/terms", icon: FileText },
         { label: "Blogs", path: "/blogs", icon: FileText },
-        { label: "Settings", path: "/settings", icon: Settings },
     ];
 
     const [active, setActive] = useState(() => {
@@ -147,7 +149,11 @@ const Sidebar = () => {
         const matched = itemsToShow.find(item => path.includes(item.path.toLowerCase()));
         return matched ? matched.label : "Dashboard";
     });
-    const [open, setOpen] = useState(false);   // mobile drawer
+    
+    const [localOpen, setLocalOpen] = useState(false);
+    const open = propsOpen !== undefined ? propsOpen : localOpen;
+    const setOpen = propsSetOpen !== undefined ? propsSetOpen : setLocalOpen;
+
     const [collapsed, setCollapsed] = useState(false);   // desktop icon-only mode
 
     const sidebarContent = (isMobile = false) => (
@@ -156,47 +162,68 @@ const Sidebar = () => {
             <div className="absolute left-0 top-0 bottom-0 w-1 rounded-r-sm bg-gradient-to-b from-brand-light to-green-300 opacity-80" />
 
             {/* ── Brand ─────────────────────────────────────────────────────── */}
-            <div className={`flex items-center border-b border-gray-100 px-4 py-5 h-[73px]
+            <div className={`flex items-center border-b border-gray-100 pl-3 pr-2 py-1 h-[60px]
                 ${collapsed && !isMobile ? "justify-center" : "justify-between"}`}>
 
-                {(!collapsed || isMobile) && (
-                    <div>
-                        <h1 className="text-base font-bold text-brand-primary tracking-tight leading-tight">
-                            BookMyVenue
-                        </h1>
-                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
-                            {isAdminUser ? "Admin Area" : "Management"}
-                        </p>
+                {(!collapsed || isMobile) ? (
+                    <div className="flex items-center gap-1.5">
+                        <img 
+                            src="/logo.png" 
+                            alt="Logo" 
+                            className="w-12 h-12 object-contain rounded-lg"
+                        />
+                        <div>
+                            <h1 className="text-[15px] font-bold text-brand-primary tracking-tight leading-tight">
+                                BOOK MY VENUE
+                            </h1>
+                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
+                                {isAdminUser ? "Admin Area" : "Management"}
+                            </p>
+                        </div>
                     </div>
+                ) : (
+                    <button
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-50 transition-all duration-200"
+                        title="Expand Sidebar"
+                    >
+                        <img 
+                            src="/logo.png" 
+                            alt="Logo" 
+                            className="w-10 h-10 object-contain rounded-lg transition-transform duration-200 hover:scale-105"
+                        />
+                    </button>
                 )}
 
-                <div className="flex items-center gap-1">
-                    {/* Desktop collapse toggle */}
-                    {!isMobile && (
-                        <button
-                            onClick={() => setCollapsed(!collapsed)}
-                            className="hidden md:flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-brand-light transition-colors"
-                            aria-label="Toggle sidebar"
-                        >
-                            <Menu size={18} />
-                        </button>
-                    )}
+                {(!collapsed || isMobile) && (
+                    <div className="flex items-center gap-1">
+                        {/* Desktop collapse toggle */}
+                        {!isMobile && (
+                            <button
+                                onClick={() => setCollapsed(!collapsed)}
+                                className="hidden md:flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-brand-light transition-colors"
+                                aria-label="Toggle sidebar"
+                            >
+                                <Menu size={18} />
+                            </button>
+                        )}
 
-                    {/* Mobile close */}
-                    {isMobile && (
-                        <button
-                            onClick={() => setOpen(false)}
-                            className="flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
-                            aria-label="Close menu"
-                        >
-                            <X size={20} />
-                        </button>
-                    )}
-                </div>
+                        {/* Mobile close */}
+                        {isMobile && (
+                            <button
+                                onClick={() => setOpen(false)}
+                                className="flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+                                aria-label="Close menu"
+                            >
+                                <X size={20} />
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* ── Navigation ────────────────────────────────────────────────── */}
-            <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
+            <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto scrollbar-hide">
                 {itemsToShow.map((item) => (
                     <SidebarItem
                         key={item.label}
@@ -240,19 +267,6 @@ const Sidebar = () => {
                 </button>
 
                 {(!collapsed || isMobile) && <div className="h-px bg-gray-100 mb-3 mx-2" />}
-
-                {/* Help Center */}
-                <button
-                    className={`
-                        group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                        text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all duration-200 border-none cursor-pointer bg-transparent
-                        ${collapsed && !isMobile ? "justify-center" : ""}
-                    `}
-                    title={collapsed && !isMobile ? "Help Center" : undefined}
-                >
-                    <HelpCircle size={18} className="shrink-0" />
-                    {(!collapsed || isMobile) && <span>Help Center</span>}
-                </button>
 
                 {/* Logout */}
                 <button
@@ -314,16 +328,14 @@ const Sidebar = () => {
                 {sidebarContent(false)}
             </aside>
 
-            {/* ── Mobile hamburger in top-left (shown inside Navbar area) ── */}
-            {/* This is handled from Navbar on mobile via the open state prop */}
-            {/* We expose a trigger button for mobile via the Navbar */}
+            {/* ── Floating Mobile menu trigger button on bottom-right ── */}
             <button
                 onClick={() => setOpen(true)}
-                className="md:hidden fixed top-3.5 left-4 z-30 p-2 rounded-xl bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-gray-50 transition-colors duration-200"
+                className="md:hidden fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-brand-primary text-white flex items-center justify-center shadow-lg shadow-brand-primary/30 hover:bg-brand-light hover:scale-105 active:scale-95 transition-all duration-200 border-none cursor-pointer"
                 aria-label="Open menu"
                 id="mobile-menu-trigger"
             >
-                <Menu size={20} />
+                <Menu size={24} className="text-white" strokeWidth={2.5} />
             </button>
 
             {/* ══ LOGOUT CONFIRMATION MODAL ══════════════════════════════════ */}

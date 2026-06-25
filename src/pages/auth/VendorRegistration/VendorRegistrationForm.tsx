@@ -326,7 +326,7 @@ export default function VendorRegistrationForm() {
                                 </div>
                             ) : (
                                 <div 
-                                    className="space-y-4"
+                                    className="terms-content whitespace-pre-wrap text-left space-y-4"
                                     dangerouslySetInnerHTML={{ 
                                         __html: termsContent || "<p class='text-gray-500 italic text-center py-6'>No active terms currently defined.</p>" 
                                     }}

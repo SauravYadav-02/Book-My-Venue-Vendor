@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import type { FormErrors, VenueForm } from "./AddVenue/types/Interface";
 import { INITIAL_FORM, STEPS } from "./AddVenue/types/Constants";
 import StepBar from "./AddVenue/components/StepBar";
@@ -181,6 +182,15 @@ export default function AddVenue() {
       <div className="hidden sm:block absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl max-h-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
 
       <div className="w-full max-w-4xl bg-white sm:rounded-3xl sm:shadow-[0_20px_60px_rgba(15,_118,_110,_0.04)] sm:border sm:border-slate-100/50 relative z-10 flex flex-col p-4 sm:p-10 transition-all duration-300">
+        
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/venue")}
+          className="group mb-4 sm:mb-6 flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-emerald-700 transition-colors border-none bg-transparent cursor-pointer p-0 self-start focus:outline-none"
+        >
+          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+          <span>Back to Listings</span>
+        </button>
 
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-10 gap-3 sm:gap-4">

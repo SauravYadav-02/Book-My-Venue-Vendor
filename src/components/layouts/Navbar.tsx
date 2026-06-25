@@ -3,18 +3,29 @@ import { Bell, Search, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVendor } from "../../context/VendorContext";
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+    onMenuClick?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = () => {
     const [showProfileInfo, setShowProfileInfo] = useState(false);
     const { vendor, loading } = useVendor();
 
-    const vendorName = loading ? "Loading..." : (vendor?.fullName || "Vendor Partner");
+    const vendorName = loading ? "Loading..." : (vendor?.fullName || "Vendor");
     const businessName = loading ? "Please wait..." : (vendor?.businessName || "Owner");
 
     return (
-        <header className="w-full bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 xl:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">
+        <header className="w-full bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 xl:px-8 h-[60px] flex items-center justify-between sticky top-0 z-40">
 
             {/* ── Left: Search & Title (Mobile) ───────────────────────── */}
-            <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-3 flex-1">
+                {/* Mobile Logo - shown on mobile, hidden on tablet and larger */}
+                <img 
+                    src="/logo.png" 
+                    alt="Logo" 
+                    className="w-[84px] h-[84px] object-contain rounded-lg md:hidden -my-3 relative z-10"
+                />
+
                 <h1 className="font-semibold text-gray-800 tracking-tight text-lg md:text-xl hidden md:block">
                     Vendor Dashboard
                 </h1>

@@ -18,8 +18,18 @@ import {
   Phone,
   Mail,
   ChevronDown,
-  ArrowLeft
+  ArrowLeft,
+  Building2
 } from "lucide-react";
+
+const getInitials = (name?: string) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0].slice(0, 2).toUpperCase();
+};
 
 export default function VendorComplaints() {
   const vendorId = localStorage.getItem("vendorId") || "";
@@ -140,17 +150,17 @@ export default function VendorComplaints() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="flex flex-col h-[calc(100vh-170px)] bg-stone-50/50 p-4 sm:p-6 lg:p-8 font-sans overflow-hidden">
       <Toaster />
 
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-6 shrink-0">
         <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 tracking-tight">Customer Complaints</h1>
         <p className="text-sm text-stone-500 mt-1">Review issues raised by users regarding your venues, reply, and track statuses.</p>
       </div>
 
       {/* Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-[450px]">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden min-h-0">
 
         {/* Complaints List Panel */}
         <div className={`lg:col-span-4 border-r border-stone-200 flex flex-col h-full max-h-full overflow-hidden ${selectedComplaint ? "hidden lg:flex" : "flex"}`}>
@@ -158,7 +168,7 @@ export default function VendorComplaints() {
             <h2 className="text-xs font-bold uppercase tracking-widest text-stone-400">Assigned Complaints</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 min-h-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-stone-100 min-h-0">
             {listLoading ? (
               <div className="p-8 text-center text-stone-400 text-sm">Loading complaints...</div>
             ) : complaints.length === 0 ? (
@@ -270,15 +280,21 @@ export default function VendorComplaints() {
                     <span>{selectedComplaint.user?.phone}</span>
                   </div>
                   {selectedComplaint.venue && (
-                    <div className="mt-1 pt-1.5 border-t border-stone-100">
-                      <span className="text-stone-400 font-medium">Venue:</span> <span className="text-stone-700 font-semibold">{selectedComplaint.venue.name} ({selectedComplaint.venue.city})</span>
+                    <div className="mt-2 p-2 bg-stone-100/80 rounded-lg flex items-center gap-2">
+                      <Building2 size={13} className="text-stone-500" />
+                      <div>
+                        <p className="text-[9px] uppercase tracking-wider text-stone-450 font-bold">Targeted Venue</p>
+                        <p className="font-semibold text-stone-850 text-[11px]">
+                          {selectedComplaint.venue.name} ({selectedComplaint.venue.city})
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Comments/Replies Area */}
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-stone-50/20">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 min-h-0 bg-stone-50/20">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8 text-stone-400">
                     <MessageSquare size={32} className="mb-1 text-stone-300" />
@@ -287,22 +303,55 @@ export default function VendorComplaints() {
                 ) : (
                   messages.map((msg) => {
                     const isOwn = msg.senderId === vendorId;
+                    const isAdminMsg = msg.senderModel === "Admin";
+                    
                     return (
-                      <div key={msg._id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                      <div key={msg._id} className={`flex items-start gap-2.5 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                        {/* Avatar */}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 shadow-sm ${
                           isOwn
-                            ? "bg-stone-800 text-white rounded-br-none"
-                            : "bg-white border border-stone-200/70 text-stone-800 rounded-bl-none"
+                            ? "bg-[#4a5043] text-stone-150"
+                            : isAdminMsg
+                              ? "bg-amber-600 text-white font-bold"
+                              : "bg-slate-200 text-slate-700"
                         }`}>
-                          <div className="flex items-center justify-between gap-4 mb-1">
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isOwn ? "text-stone-300" : "text-stone-400"}`}>
-                              {isOwn ? "You" : msg.senderName} ({msg.senderModel})
-                            </span>
-                            <span className={`text-[9px] ${isOwn ? "text-stone-400" : "text-stone-400"}`}>
+                          {getInitials(isOwn ? "You" : msg.senderName)}
+                        </div>
+
+                        {/* Message Bubble Column */}
+                        <div className={`flex flex-col max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
+                          {/* Sender name & time metadata */}
+                          <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-stone-400">
+                            {!isOwn ? (
+                              <>
+                                <span className="font-semibold text-stone-650">{msg.senderName}</span>
+                                <span className={`px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider rounded-full border ${
+                                  isAdminMsg 
+                                    ? "bg-amber-50 text-amber-700 border-amber-255" 
+                                    : "bg-stone-100 text-stone-600 border-stone-200"
+                                }`}>
+                                  {msg.senderModel}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-semibold text-stone-650">You</span>
+                            )}
+                            <span>•</span>
+                            <span>
                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p className="leading-relaxed whitespace-pre-line">{msg.message}</p>
+
+                          {/* Message Bubble itself */}
+                          <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm leading-relaxed whitespace-pre-line text-xs font-medium ${
+                            isOwn
+                              ? "bg-[#4a5043] text-white rounded-tr-none"
+                              : isAdminMsg
+                                ? "bg-amber-50/80 border border-amber-200/60 text-stone-900 rounded-tl-none"
+                                : "bg-white border border-stone-200/70 text-stone-800 rounded-tl-none"
+                          }`}>
+                            <p className="leading-relaxed whitespace-pre-line text-xs font-medium">{msg.message}</p>
+                          </div>
                         </div>
                       </div>
                     );
@@ -312,30 +361,30 @@ export default function VendorComplaints() {
 
               {/* Footer text reply input */}
               <div className="p-4 border-t border-stone-200 bg-white shrink-0">
-                <form onSubmit={handleSendMessage} className="flex gap-2">
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2 bg-stone-50/80 border border-stone-200 rounded-full pl-4 pr-1.5 py-1.5 focus-within:border-stone-450 focus-within:ring-1 focus-within:ring-stone-450/20 transition-all">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your reply to customer..."
                     disabled={selectedComplaint.status === "Closed" || selectedComplaint.status === "Rejected"}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 outline-none text-sm text-stone-800 placeholder:text-stone-400 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 disabled:bg-stone-50 disabled:cursor-not-allowed transition-all"
+                    className="flex-1 bg-transparent border-0 outline-none text-sm text-stone-800 placeholder:text-stone-400 focus:ring-0 focus:outline-none min-w-0 disabled:cursor-not-allowed"
                   />
                   <button
                     type="submit"
                     disabled={!newMessage.trim() || selectedComplaint.status === "Closed" || selectedComplaint.status === "Rejected"}
-                    className="bg-stone-800 hover:bg-stone-900 disabled:bg-stone-200 disabled:cursor-not-allowed text-white p-2.5 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-95"
+                    className="bg-[#4a5043] hover:bg-[#3d4237] disabled:bg-stone-200 disabled:cursor-not-allowed text-white p-2.5 rounded-full flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
                   >
-                    <Send size={16} />
+                    <Send size={14} className="translate-x-[0.5px] -translate-y-[0.5px]" />
                   </button>
                 </form>
                 {selectedComplaint.status === "Closed" && (
-                  <p className="text-[10px] text-amber-600 font-semibold mt-1 flex items-center gap-1">
+                  <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
                     <AlertCircle size={10} /> This complaint has been closed. Replying is disabled.
                   </p>
                 )}
                 {selectedComplaint.status === "Rejected" && (
-                  <p className="text-[10px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                  <p className="text-[10px] text-rose-600 font-semibold mt-1.5 flex items-center gap-1">
                     <AlertCircle size={10} /> This complaint has been rejected by Admin. Replying is disabled.
                   </p>
                 )}

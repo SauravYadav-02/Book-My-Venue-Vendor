@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:3000";
-const BASE_URL = "http://localhost:3000";
+// const BASE_URL = "http://192.168.1.12:3000";
+const BASE_URL = "http://192.168.1.12:3000";
 
 export interface VendorPaymentBooking {
   bookingId: string;

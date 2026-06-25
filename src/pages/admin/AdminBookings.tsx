@@ -89,19 +89,36 @@ export default function AdminBookings() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const s = status.toLowerCase();
+  const getStatusBadge = (b: Booking) => {
+    const s = b.status.toLowerCase();
+    if (s === "cancelled") {
+      const refundStatus = (b as any).cancellation?.refundStatus;
+      if (refundStatus === "pending") {
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+            <Clock size={12} /> Refund Pending
+          </span>
+        );
+      } else if (refundStatus === "processed") {
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 size={12} /> Refund Processed
+          </span>
+        );
+      } else {
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-50 text-stone-600 border border-stone-200">
+            <XCircle size={12} className="text-stone-500" /> Cancelled
+          </span>
+        );
+      }
+    }
+
     switch (s) {
       case "success":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
             <CheckCircle2 size={12} /> Success
-          </span>
-        );
-      case "cancelled":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-50 text-stone-600 border border-stone-200">
-            <XCircle size={12} className="text-stone-500" /> Cancelled
           </span>
         );
       case "pending":
@@ -113,7 +130,7 @@ export default function AdminBookings() {
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
-            <XCircle size={12} /> {status}
+            <XCircle size={12} /> {b.status}
           </span>
         );
     }
@@ -245,7 +262,23 @@ export default function AdminBookings() {
                       <td className="py-4 px-6 text-right font-bold text-gray-800">
                         {currencyFormatter.format(b.cost)}
                       </td>
-                      <td className="py-4 px-6 text-center">{getStatusBadge(b.status)}</td>
+                      <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col items-center gap-2">
+                          {getStatusBadge(b)}
+                          {(b as any).cancellation?.refundStatus === "pending" && (
+                            <button
+                              onClick={() => handleRefundProcess(b._id)}
+                              disabled={refundingId === b._id}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[10px] tracking-wider uppercase transition-colors shadow-sm cursor-pointer border-none flex items-center gap-1"
+                            >
+                              {refundingId === b._id ? (
+                                <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : null}
+                              Process
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}

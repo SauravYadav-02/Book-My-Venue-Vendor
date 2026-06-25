@@ -410,7 +410,7 @@ export default function VenueList() {
                                 {selectedVenue.mediaFiles && selectedVenue.mediaFiles.length > 0 ? (
                                     <>
                                         <img
-                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : /* `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}` */ `http://localhost:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
+                                            src={selectedVenue.mediaFiles[currentImageIndex].startsWith('http') || selectedVenue.mediaFiles[currentImageIndex].startsWith('data:') ? selectedVenue.mediaFiles[currentImageIndex] : /* `http://192.168.1.12:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}` */ `http://192.168.1.12:3000${selectedVenue.mediaFiles[currentImageIndex].startsWith('/') ? '' : '/'}${selectedVenue.mediaFiles[currentImageIndex]}`}
                                             alt={`${selectedVenue.name} - image ${currentImageIndex + 1}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -542,8 +542,8 @@ export default function VenueList() {
                                     </div>
                                 )}
 
-                                {/* ✅ Per-Plate Pricing (veg / non-veg only) */}
-                                {(selectedVenue.vegPrice || selectedVenue.nonVegPrice) && (
+                                {/* Per-Plate Pricing (veg / non-veg only) */}
+                                {(selectedVenue.vegPrice || selectedVenue.nonVegPrice || selectedVenue.bothPrice) && (
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-800 mb-3">Catering Pricing</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -559,6 +559,13 @@ export default function VenueList() {
                                                     <p className="text-xs text-red-600 font-semibold mb-1">🔴 Non-Veg Plate</p>
                                                     <p className="text-base font-bold text-red-800">{currencyFormatter.format(Number(selectedVenue.nonVegPrice))}</p>
                                                     <p className="text-[10px] text-red-500">per plate</p>
+                                                </div>
+                                            )}
+                                            {selectedVenue.bothPrice && (
+                                                <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center">
+                                                    <p className="text-xs text-slate-600 font-semibold mb-1">🟢🔴 Veg & Non-Veg Both</p>
+                                                    <p className="text-base font-bold text-slate-800">{currencyFormatter.format(Number(selectedVenue.bothPrice))}</p>
+                                                    <p className="text-[10px] text-slate-400">per plate</p>
                                                 </div>
                                             )}
                                         </div>

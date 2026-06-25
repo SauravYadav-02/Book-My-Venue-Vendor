@@ -32,8 +32,8 @@ export default function StepReview({
         if (file instanceof File) return URL.createObjectURL(file);
         if (!file) return '';
         if (file.startsWith('http://') || file.startsWith('https://') || file.startsWith('data:')) return file;
-        // const baseUrl = 'http://localhost:3000';
-        const baseUrl = 'http://localhost:3000';
+        // const baseUrl = 'http://192.168.1.12:3000';
+        const baseUrl = 'http://192.168.1.12:3000';
         return file.startsWith('/') ? `${baseUrl}${file}` : `${baseUrl}/${file}`;
     };
 

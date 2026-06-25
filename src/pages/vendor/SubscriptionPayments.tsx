@@ -84,14 +84,14 @@ const SummaryCard = ({
 }: {
   icon: React.ReactNode; label: string; value: string; sub?: string; gradient: string;
 }) => (
-  <div className={`rounded-2xl p-5 text-white shadow-md flex items-center gap-4 ${gradient}`}>
-    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+  <div className={`rounded-2xl p-3 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 ${gradient}`}>
+    <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
       {icon}
     </div>
-    <div className="min-w-0">
-      <p className="text-xs font-semibold uppercase tracking-wider opacity-80">{label}</p>
-      <p className="text-2xl font-bold mt-0.5 truncate">{value}</p>
-      {sub && <p className="text-xs opacity-70 mt-0.5">{sub}</p>}
+    <div className="min-w-0 w-full">
+      <p className="text-[9px] sm:text-xs font-semibold uppercase tracking-wider opacity-80 leading-tight">{label}</p>
+      <p className="text-sm sm:text-base md:text-2xl font-bold mt-0.5 truncate" title={value}>{value}</p>
+      {sub && <p className="text-[9px] sm:text-xs opacity-70 mt-0.5 leading-tight">{sub}</p>}
     </div>
   </div>
 );
@@ -301,28 +301,28 @@ const SubscriptionPayments = () => {
       {summary && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <SummaryCard
-            icon={<TrendingUp size={20} className="text-white" />}
+            icon={<TrendingUp className="text-white w-4 h-4 sm:w-5 sm:h-5" />}
             gradient="bg-gradient-to-br from-violet-600 to-violet-800"
             label="Total Transactions"
             value={String(pagination?.totalRecords ?? 0)}
             sub="Subscriptions & add-ons"
           />
           <SummaryCard
-            icon={<Wallet size={20} className="text-white" />}
+            icon={<Wallet className="text-white w-4 h-4 sm:w-5 sm:h-5" />}
             gradient="bg-gradient-to-br from-emerald-500 to-emerald-700"
             label="Amount Paid"
             value={currencyFormatter.format(summary.totalPaid)}
             sub={`${summary.countByStatus.success} successful`}
           />
           <SummaryCard
-            icon={<Clock size={20} className="text-white" />}
+            icon={<Clock className="text-white w-4 h-4 sm:w-5 sm:h-5" />}
             gradient="bg-gradient-to-br from-amber-400 to-amber-600"
             label="Pending"
             value={String(summary.countByStatus.pending)}
             sub="Awaiting confirmation"
           />
           <SummaryCard
-            icon={<AlertCircle size={20} className="text-white" />}
+            icon={<AlertCircle className="text-white w-4 h-4 sm:w-5 sm:h-5" />}
             gradient="bg-gradient-to-br from-red-400 to-red-600"
             label="Failed"
             value={String(summary.countByStatus.failed)}
@@ -398,7 +398,7 @@ const SubscriptionPayments = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[1000px] text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 {["Type", "Plan / Description", "Payment Date", "Billing Period", "Method", "Amount", "Status", "Transaction ID"].map((h) => (

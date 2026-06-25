@@ -1,26 +1,103 @@
 import { useState, useEffect } from "react";
 import { useSubscription } from "../../context/SubscriptionContext";
-import { DollarSign, Building, CalendarCheck, CreditCard, AlertCircle } from "lucide-react";
+import { IndianRupee, Building, CalendarCheck, CreditCard, AlertCircle } from "lucide-react";
 import { getComplaintsList } from "../../services/complaintService";
 import { useNavigate } from "react-router-dom";
+import { getVenuesByVendor } from "../../services/venueService";
+import { getVendorBookings } from "../../services/bookingService";
+import { getVendorPaymentHistory } from "../../services/paymentHistoryService";
+import { currencyFormatter } from "../../utils/currency";
 
 const DashBoardCard = () => {
     const navigate = useNavigate();
-    const { vendorSubscription, venueUsage, loading } = useSubscription();
+    const { vendorSubscription, venueUsage, loading: subLoading } = useSubscription();
+    
+    // Stats States
     const [activeComplaintsCount, setActiveComplaintsCount] = useState<number>(0);
+    const [totalRevenue, setTotalRevenue] = useState<number>(0);
+    const [activeListingsCount, setActiveListingsCount] = useState<number>(0);
+    const [pendingListingsCount, setPendingListingsCount] = useState<number>(0);
+    const [pendingBookingsCount, setPendingBookingsCount] = useState<number>(0);
+    const [statsLoading, setStatsLoading] = useState<boolean>(true);
+    const [growthText, setGrowthText] = useState<string>("No data");
+    const [growthColor, setGrowthColor] = useState<string>("text-gray-500");
 
     useEffect(() => {
         const vendorId = localStorage.getItem("vendorId");
-        if (vendorId) {
-            getComplaintsList({ vendorid: vendorId })
-                .then((list) => {
-                    const activeCount = list.filter(
-                        (c) => c.status === "Open" || c.status === "In Progress"
-                    ).length;
-                    setActiveComplaintsCount(activeCount);
-                })
-                .catch(console.error);
+        if (!vendorId) {
+            setStatsLoading(false);
+            return;
         }
+
+        const fetchStats = async () => {
+            setStatsLoading(true);
+            try {
+                // 1. Fetch complaints list & count active ones
+                const complaints = await getComplaintsList({ vendorid: vendorId });
+                const activeComplaints = complaints.filter(
+                    (c) => c.status === "Open" || c.status === "In Progress"
+                ).length;
+                setActiveComplaintsCount(activeComplaints);
+
+                // 2. Fetch venues to calculate active & pending listings
+                const venuesRes = await getVenuesByVendor(vendorId);
+                const venuesList = venuesRes?.data || [];
+                const activeListings = venuesList.filter(
+                    (v: any) => v.status === "approved" && !v.deactivated
+                ).length;
+                const pendingListings = venuesList.filter(
+                    (v: any) => v.status === "pending"
+                ).length;
+                setActiveListingsCount(activeListings);
+                setPendingListingsCount(pendingListings);
+
+                // 3. Fetch bookings to calculate pending bookings
+                const bookingsRes = await getVendorBookings(vendorId);
+                const bookingsList = bookingsRes?.bookings || [];
+                const pendingBookings = bookingsList.filter(
+                    (b: any) => b.status === "pending"
+                ).length;
+                setPendingBookingsCount(pendingBookings);
+
+                // 4. Fetch payment history to calculate revenue & growth
+                const payments = await getVendorPaymentHistory(vendorId);
+                const revenue = payments
+                    .filter((p: any) => p.paymentStatus === "success" && p.type !== "subscription")
+                    .reduce((sum: number, p: any) => sum + p.amount, 0);
+                setTotalRevenue(revenue);
+
+                // Calculate growth percent dynamically
+                const now = new Date();
+                const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+                const thisMonthRevenue = payments
+                    .filter((p: any) => p.paymentStatus === "success" && p.type !== "subscription" && new Date(p.paymentTimestamp || p.createdAt) >= startOfThisMonth)
+                    .reduce((sum: number, p: any) => sum + p.amount, 0);
+
+                const lastMonthRevenue = payments
+                    .filter((p: any) => p.paymentStatus === "success" && p.type !== "subscription" && new Date(p.paymentTimestamp || p.createdAt) >= startOfLastMonth && new Date(p.paymentTimestamp || p.createdAt) < startOfThisMonth)
+                    .reduce((sum: number, p: any) => sum + p.amount, 0);
+
+                if (lastMonthRevenue > 0) {
+                    const growth = ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+                    setGrowthText(`${growth >= 0 ? "+" : ""}${growth.toFixed(1)}% from last month`);
+                    setGrowthColor(growth >= 0 ? "text-green-600" : "text-red-650");
+                } else if (thisMonthRevenue > 0) {
+                    setGrowthText("+100% from last month");
+                    setGrowthColor("text-green-600");
+                } else {
+                    setGrowthText("No earnings this month");
+                    setGrowthColor("text-gray-500");
+                }
+            } catch (err) {
+                console.error("Error loading dashboard stats:", err);
+            } finally {
+                setStatsLoading(false);
+            }
+        };
+
+        fetchStats();
     }, []);
 
     // format date helper
@@ -81,20 +158,20 @@ const DashBoardCard = () => {
         {
             id: 1,
             title: "TOTAL REVENUE",
-            value: "$142,850.00",
-            subtext: "+12.5% from last month",
-            subtextColor: "text-green-600",
-            Icon: DollarSign,
+            value: statsLoading ? "..." : currencyFormatter.format(totalRevenue),
+            subtext: growthText,
+            subtextColor: growthColor,
+            Icon: IndianRupee,
             borderColor: "border-green-100",
             bgColor: "bg-green-50",
-            path: null
+            path: "/payments"
         },
         {
             id: 2,
             title: "ACTIVE LISTINGS",
-            value: "12",
-            subtext: "4 pending optimization",
-            subtextColor: "text-gray-600",
+            value: statsLoading ? "..." : String(activeListingsCount),
+            subtext: pendingListingsCount > 0 ? `${pendingListingsCount} pending approval` : "All listings active",
+            subtextColor: pendingListingsCount > 0 ? "text-amber-600 font-semibold" : "text-green-600",
             Icon: Building,
             borderColor: "border-blue-100",
             bgColor: "bg-blue-50",
@@ -103,9 +180,9 @@ const DashBoardCard = () => {
         {
             id: 3,
             title: "PENDING BOOKINGS",
-            value: "28",
-            subtext: "Requires immediate action",
-            subtextColor: "text-red-600",
+            value: statsLoading ? "..." : String(pendingBookingsCount),
+            subtext: pendingBookingsCount > 0 ? "Requires immediate action" : "No pending bookings",
+            subtextColor: pendingBookingsCount > 0 ? "text-red-600 font-semibold" : "text-green-600",
             Icon: CalendarCheck,
             borderColor: "border-red-100",
             bgColor: "bg-red-50",
@@ -114,7 +191,7 @@ const DashBoardCard = () => {
         {
             id: 4,
             title: "ACTIVE COMPLAINTS",
-            value: String(activeComplaintsCount),
+            value: statsLoading ? "..." : String(activeComplaintsCount),
             subtext: activeComplaintsCount > 0 ? "Requires resolution chat" : "No issues pending",
             subtextColor: activeComplaintsCount > 0 ? "text-red-600 font-semibold" : "text-green-600",
             Icon: AlertCircle,
@@ -139,84 +216,90 @@ const DashBoardCard = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full">
                 {cardData.map(({ id, title, value, subtext, subtextColor, Icon, borderColor, bgColor, path }) => (
                     <div
                         key={id}
                         onClick={() => path && navigate(path)}
-                        className={`border rounded-xl p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between ${path ? "cursor-pointer hover:shadow-md transition-all active:scale-[0.99]" : ""}`}
+                        className={`border rounded-xl p-4 md:p-6 shadow-sm w-full ${borderColor} ${bgColor} flex flex-col justify-between ${path ? "cursor-pointer hover:shadow-md transition-all active:scale-[0.99]" : ""}`}
                     >
                         <div>
-                            <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">
-                                <span>{title}</span>
-                                <Icon className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
+                            <div className="flex justify-between items-center text-xs md:text-sm text-gray-600 mb-2 md:mb-3 font-semibold tracking-wide">
+                                <span className="truncate">{title}</span>
+                                <Icon className="w-4 h-4 md:w-5 md:h-5 text-gray-700 shrink-0" strokeWidth={2.5} />
                             </div>
-                            <div className="text-3xl font-bold mb-2 text-gray-900">{value}</div>
+                            <div className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 md:mb-2 text-gray-900 truncate">{value}</div>
                         </div>
-                        <div className={`text-sm font-medium ${subtextColor}`}>{subtext}</div>
+                        <div className={`text-xs md:text-sm font-medium leading-tight ${subtextColor} truncate`}>{subtext}</div>
                     </div>
                 ))}
+            </div>
 
-                {/* New Current Plan Widget */}
-                <div className={`border rounded-xl p-6 shadow-sm w-full ${subBorderColor} ${subBgColor} flex flex-col justify-between`}>
-                    {loading ? (
-                        <div className="animate-pulse flex flex-col justify-between h-full">
-                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
-                            <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                        </div>
-                    ) : (
-                        <>
+            {/* Current Plan Banner */}
+            <div className={`border rounded-xl p-4 md:p-6 shadow-sm w-full ${subBorderColor} ${subBgColor} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
+                {subLoading ? (
+                    <div className="animate-pulse flex flex-row items-center justify-between w-full">
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white/80 rounded-xl shadow-sm border border-gray-100">
+                                <CreditCard className="w-6 h-6 text-gray-700" strokeWidth={2.5} />
+                            </div>
                             <div>
-                                <div className="flex justify-between items-center text-sm text-gray-600 mb-3 font-semibold tracking-wide">
-                                    <span>CURRENT PLAN</span>
-                                    <CreditCard className="w-5 h-5 text-gray-700" strokeWidth={2.5} />
+                                <div className="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase tracking-wider">Current Plan</div>
+                                <div className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <span>{vendorSubscription ? (vendorSubscription.planId?.name || "Standard Plan") : "Free Tier"}</span>
+                                    {vendorSubscription && (
+                                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-200/60 text-gray-700 uppercase tracking-wider">
+                                            {vendorSubscription.cycle}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="text-xl font-bold text-gray-900 truncate">
-                                    {vendorSubscription ? (vendorSubscription.planId?.name || "Standard Plan") : "Free Tier"}
-                                </div>
-                                {vendorSubscription && (
-                                    <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-200/60 text-gray-700 uppercase tracking-wider">
-                                        {vendorSubscription.cycle}
-                                    </span>
-                                )}
                             </div>
-                            
-                            <div className="text-xs space-y-1.5 font-medium text-gray-600 mt-2">
-                                <div className="flex justify-between pt-1">
-                                    <span>Venue Usage:</span>
-                                    <span className="font-bold text-gray-800">
-                                        {venueUsage} / {vendorSubscription ? vendorSubscription.planId?.maxVenues : 1}
-                                    </span>
-                                </div>
-                                {vendorSubscription ? (
-                                    <>
-                                        <div className="flex justify-between">
-                                            <span>Expiry Date:</span>
-                                            <span className={`font-semibold ${expiryColorClass}`}>{formatDate(vendorSubscription.expiresAt)}</span>
-                                        </div>
-                                        <div className="pt-1.5 border-t border-gray-150 mt-1 flex justify-between items-center text-sm font-semibold">
-                                            <span>Status:</span>
-                                            <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
-                                                vendorSubscription.status === "active"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : vendorSubscription.status === "grace"
-                                                    ? "bg-amber-100 text-amber-800"
-                                                    : "bg-red-100 text-red-800"
-                                            }`}>
-                                                {vendorSubscription.status}
-                                            </span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="text-red-500 font-bold text-sm mt-1">
-                                        No active plan found
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-6 text-xs md:text-sm font-medium text-gray-600">
+                            <div>
+                                <span className="text-gray-400 mr-1.5">Venue Usage:</span>
+                                <span className="font-bold text-gray-800">
+                                    {venueUsage}/{vendorSubscription ? vendorSubscription.planId?.maxVenues : 1}
+                                </span>
+                            </div>
+                            {vendorSubscription && (
+                                <>
+                                    <div className="h-4 w-px bg-gray-200 hidden sm:block"></div>
+                                    <div>
+                                        <span className="text-gray-400 mr-1.5">Expires:</span>
+                                        <span className={`font-semibold ${expiryColorClass}`}>{formatDate(vendorSubscription.expiresAt)}</span>
                                     </div>
-                                )}
-                            </div>
-                        </>
-                    )}
-                </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-400 font-medium hidden md:inline">Status:</span>
+                            {vendorSubscription ? (
+                                <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
+                                    vendorSubscription.status === "active"
+                                        ? "bg-green-100 text-green-800 border border-green-200"
+                                        : vendorSubscription.status === "grace"
+                                        ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                        : "bg-red-100 text-red-850 border border-red-200"
+                                }`}>
+                                    {vendorSubscription.status}
+                                </span>
+                            ) : (
+                                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-red-100 text-red-850 border border-red-200">
+                                    No active plan
+                                </span>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

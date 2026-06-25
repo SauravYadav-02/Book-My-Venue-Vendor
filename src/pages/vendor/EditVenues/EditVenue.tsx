@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { getVenueById, updateVenue } from "../../../services/venueService";
 import type { FormErrors, VenueForm } from "../AddVenue/types/Interface";
 import { INITIAL_FORM, STEPS } from "../AddVenue/types/Constants";
@@ -46,7 +47,7 @@ export default function EditVenue() {
                 const loggedInVendorId = localStorage.getItem("vendorId");
                 if (loggedInVendorId && venue.vendorId !== loggedInVendorId) {
                     alert("You are not authorized to edit this venue.");
-                    navigate("/venues");
+                    navigate("/venue");
                     return;
                 }
 
@@ -61,6 +62,7 @@ export default function EditVenue() {
                     pricePerDay: venue.pricePerDay ? String(venue.pricePerDay) : "",
                     vegPrice: venue.vegPrice ? String(venue.vegPrice) : "",
                     nonVegPrice: venue.nonVegPrice ? String(venue.nonVegPrice) : "",
+                    bothPrice: venue.bothPrice ? String(venue.bothPrice) : "",
                     address: venue.address || "",
                     city: venue.city || "",
                     state: venue.state || "",
@@ -74,7 +76,7 @@ export default function EditVenue() {
                 });
             } catch {
                 alert("Failed to load venue. Redirecting back.");
-                navigate("/venues");
+                navigate("/venue");
             } finally {
                 setFetching(false);
             }
@@ -208,6 +210,15 @@ export default function EditVenue() {
             <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-2xl bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3 pointer-events-none" />
 
             <div className="w-full bg-white rounded-2xl shadow-[0_20px_60px_rgba(15,118,110,0.04)] border border-slate-100/50 relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-12 sm:pt-12 sm:pb-14">
+                
+                {/* Back Button */}
+                <button
+                    onClick={() => navigate("/venue")}
+                    className="group mb-4 sm:mb-6 flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-emerald-700 transition-colors border-none bg-transparent cursor-pointer p-0 self-start focus:outline-none"
+                >
+                    <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+                    <span>Back to Listings</span>
+                </button>
 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
@@ -219,7 +230,7 @@ export default function EditVenue() {
                     </div>
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => navigate("/venues")}
+                            onClick={() => navigate("/venue")}
                             className="group inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400
                                 hover:text-slate-700 transition-colors px-4 py-2 bg-slate-50 hover:bg-slate-100
                                 border border-slate-200 rounded-xl"

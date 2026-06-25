@@ -138,8 +138,8 @@ export default function Blogs() {
 
       // Check current files length + new files length
       const currentLength = extraFiles.length + existingImages.length;
-      if (currentLength + filesArr.length > 5) {
-        toast.error("You can upload a maximum of 5 additional images!");
+      if (currentLength + filesArr.length > 10) {
+        toast.error("You can upload a maximum of 10 additional images!");
         return;
       }
 
@@ -555,7 +555,7 @@ export default function Blogs() {
               {/* Additional Images Upload */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold tracking-widest text-slate-400 uppercase flex items-center gap-1">
-                  <ImageIcon size={12} /> Additional Images (Max 5)
+                  <ImageIcon size={12} /> Additional Images (Max 10)
                 </label>
                 <div className="flex items-center gap-3">
                   <label className="cursor-pointer inline-flex items-center gap-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-650 transition-all select-none">
@@ -568,7 +568,7 @@ export default function Blogs() {
                       className="hidden"
                     />
                   </label>
-                  <span className="text-[10px] text-slate-400">Select up to 5 additional images</span>
+                  <span className="text-[10px] text-slate-400">Select up to 10 additional images</span>
                 </div>
 
                 {/* Images Previews Grid (Existing + Fresh Uploaded) */}

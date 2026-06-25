@@ -57,12 +57,12 @@ const TypeBadge = ({ type, isRefund }: { type: string; isRefund?: boolean }) => 
 const SummaryCard = ({ icon, label, value, sub, iconBg }: {
   icon: React.ReactNode; label: string; value: string; sub?: string; iconBg: string;
 }) => (
-  <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>{icon}</div>
-    <div className="min-w-0">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-xl font-bold text-[#2d2d2d] mt-0.5 truncate">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+    <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>{icon}</div>
+    <div className="min-w-0 w-full">
+      <p className="text-[9px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider leading-tight">{label}</p>
+      <p className="text-sm sm:text-base md:text-xl font-bold text-[#2d2d2d] mt-0.5 sm:mt-1 truncate" title={value}>{value}</p>
+      {sub && <p className="text-[9px] sm:text-xs text-gray-400 mt-0.5 leading-tight">{sub}</p>}
     </div>
   </div>
 );
@@ -142,28 +142,28 @@ const PaymentHistory = () => {
       {/* ── Summary Cards ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
-          icon={<TrendingUp size={22} className="text-violet-600" />}
+          icon={<TrendingUp className="text-violet-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-violet-50"
           label="Total Transactions"
           value={String(entries.length)}
           sub={currencyFormatter.format(totalAmount) + " total"}
         />
         <SummaryCard
-          icon={<Wallet size={22} className="text-emerald-600" />}
+          icon={<Wallet className="text-emerald-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-emerald-50"
           label="Collected"
           value={currencyFormatter.format(successAmount)}
           sub={`${successCount} successful`}
         />
         <SummaryCard
-          icon={<Clock size={22} className="text-amber-600" />}
+          icon={<Clock className="text-amber-600 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-amber-50"
           label="Pending"
           value={String(pendingCount)}
           sub="Awaiting confirmation"
         />
         <SummaryCard
-          icon={<AlertCircle size={22} className="text-red-500" />}
+          icon={<AlertCircle className="text-red-500 w-4 h-4 sm:w-[22px] sm:h-[22px]" />}
           iconBg="bg-red-50"
           label="Failed"
           value={String(failedCount)}
@@ -173,53 +173,55 @@ const PaymentHistory = () => {
 
       {/* ── Filters ──────────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2 text-sm">
-            <Filter size={14} className="text-gray-400" />
-            <span className="text-gray-500 font-medium">Type:</span>
-            <div className="relative">
-              <select
-                id="type-filter"
-                value={typeFilter}
-                onChange={e => setTypeFilter(e.target.value as typeof typeFilter)}
-                className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg pl-3 pr-8 py-2 outline-none cursor-pointer"
-              >
-                <option value="all">All Types</option>
-                <option value="booking">Booking</option>
-                <option value="subscription">Subscription</option>
-                <option value="full payment">Full Payment</option>
-              </select>
-              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-nowrap overflow-x-auto scrollbar-hide py-1">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <Filter size={14} className="text-gray-400 shrink-0" />
+              <span className="text-gray-500 font-medium">Type:</span>
+              <div className="relative">
+                <select
+                  id="type-filter"
+                  value={typeFilter}
+                  onChange={e => setTypeFilter(e.target.value as typeof typeFilter)}
+                  className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg pl-3 pr-8 py-2 outline-none cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="booking">Booking</option>
+                  <option value="subscription">Subscription</option>
+                  <option value="full payment">Full Payment</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+              <span className="text-gray-500 font-medium">Status:</span>
+              <div className="relative">
+                <select
+                  id="status-filter"
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value as typeof statusFilter)}
+                  className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg pl-3 pr-8 py-2 outline-none cursor-pointer"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="success">Success</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500 font-medium">Status:</span>
-            <div className="relative">
-              <select
-                id="status-filter"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value as typeof statusFilter)}
-                className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg pl-3 pr-8 py-2 outline-none cursor-pointer"
-              >
-                <option value="all">All Statuses</option>
-                <option value="success">Success</option>
-                <option value="pending">Pending</option>
-                <option value="failed">Failed</option>
-              </select>
-              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2 text-xs text-gray-400">
-            <ReceiptText size={14} />
+          <div className="flex items-center gap-2 text-xs text-gray-400 whitespace-nowrap ml-auto sm:ml-0">
+            <ReceiptText size={14} className="shrink-0" />
             <span>Showing {entries.length} record{entries.length !== 1 ? "s" : ""}</span>
           </div>
         </div>
 
         {/* ── Table ─────────────────────────────────────────────────────────── */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[800px] text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="py-3.5 px-5 font-semibold text-xs text-gray-400 uppercase tracking-wider">Type</th>

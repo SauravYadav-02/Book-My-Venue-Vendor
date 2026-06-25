@@ -10,6 +10,7 @@ export interface VenueForm {
     pricePerDay: string;
     vegPrice: string;
     nonVegPrice: string;
+    bothPrice: string;
     availableFrom: string;
     address: string;
     city: string;

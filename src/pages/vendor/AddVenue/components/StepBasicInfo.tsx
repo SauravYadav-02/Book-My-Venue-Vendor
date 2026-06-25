@@ -290,6 +290,22 @@ function StepBasicInfo({
                         </div>
                     </div>
 
+                    <div className="flex flex-col gap-1 sm:gap-1.5 sm:col-span-2">
+                        <Label>Both Veg & Non-Veg Plate Price</Label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] sm:text-sm md:text-[15px] font-medium text-slate-400 sm:left-4">
+                                {currencyFormatter.formatToParts(0).find(part => part.type === 'currency')?.value || '₹'}
+                            </span>
+                            <div className="pl-6 sm:pl-8">
+                                <InputField
+                                    id="bothPrice" type="number" value={form.bothPrice}
+                                    placeholder="e.g. 1500" min="0"
+                                    onChange={(v) => update("bothPrice", v)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </SectionCard>
 

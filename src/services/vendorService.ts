@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { type CreateVendorRequest, type Vendor } from "../pages/auth/VendorRegistration/types/vendorTypes";
 
-// const API_URL = "http://localhost:3000/vendors/register";
-const API_URL = "http://localhost:3000/vendors/register";
+// const API_URL = "http://192.168.1.12:3000/vendors/register";
+const API_URL = "http://192.168.1.12:3000/vendors/register";
 
 export async function createVendor(
     data: CreateVendorRequest
@@ -23,6 +23,6 @@ export async function createVendor(
 }
 
 export async function getVendorById(id: string): Promise<any> {
-    const res = await axios.get(`http://localhost:3000/vendors/${id}`);
+    const res = await axios.get(`http://192.168.1.12:3000/vendors/${id}`);
     return res.data;
 }

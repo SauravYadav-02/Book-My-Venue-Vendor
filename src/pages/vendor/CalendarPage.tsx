@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { getVendorBookings, type Booking } from "../../services/bookingService";
 import { currencyFormatter } from "../../utils/currency";
 import { format } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const CalendarPage = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
     useEffect(() => {
         const vendorId = localStorage.getItem("vendorId");
@@ -33,23 +35,70 @@ const CalendarPage = () => {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart({
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+        });
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (!touchStart) return;
+        const diffX = e.changedTouches[0].clientX - touchStart.x;
+        const diffY = e.changedTouches[0].clientY - touchStart.y;
+
+        // Swipe threshold of 50px, ensuring horizontal movement dominates
+        if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0) {
+                prevMonth();
+            } else {
+                nextMonth();
+            }
+        }
+        setTouchStart(null);
+    };
+
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
     const totalDays = daysInMonth(month, year);
     const startDay = firstDayOfMonth(month, year);
 
-    // Create array of days for the grid
-    const days = [];
-    for (let i = 0; i < startDay; i++) {
-        days.push(null);
-    }
-    for (let i = 1; i <= totalDays; i++) {
-        days.push(i);
+    interface CalendarDay {
+        day: number;
+        monthOffset: number;
+        dateString: string;
     }
 
-    // Check if a specific date has any approved bookings
-    const getDateString = (day: number) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+    const prevMonthVal = month === 0 ? 11 : month - 1;
+    const prevYearVal = month === 0 ? year - 1 : year;
+    const prevTotalDays = daysInMonth(prevMonthVal, prevYearVal);
+
+    const nextMonthVal = month === 11 ? 0 : month + 1;
+    const nextYearVal = month === 11 ? year + 1 : year;
+
+    const days: CalendarDay[] = [];
+
+    // Previous month days padding
+    for (let i = startDay - 1; i >= 0; i--) {
+        const d = prevTotalDays - i;
+        const dateStr = `${prevYearVal}-${String(prevMonthVal + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({ day: d, monthOffset: -1, dateString: dateStr });
+    }
+
+    // Current month days
+    for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({ day: d, monthOffset: 0, dateString: dateStr });
+    }
+
+    // Next month days padding to make it a full grid
+    const totalCellsNeeded = Math.ceil(days.length / 7) * 7;
+    const nextDaysCount = totalCellsNeeded - days.length;
+    for (let d = 1; d <= nextDaysCount; d++) {
+        const dateStr = `${nextYearVal}-${String(nextMonthVal + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({ day: d, monthOffset: 1, dateString: dateStr });
+    }
+
     // ✅ FIX: Include all active statuses.
     // Bookings via the mock payment flow are set to "success" (not "approved").
     // Only exclude explicitly cancelled, rejected, or failed bookings.
@@ -58,68 +107,69 @@ const CalendarPage = () => {
         return bookings.filter(b => b.date === dateStr && ACTIVE_STATUSES.includes(b.status));
     };
 
-    const getBookingsForDate = (day: number) => {
-        return getBookingsForDateString(getDateString(day));
-    };
-
     const selectedBookings = selectedDate ? getBookingsForDateString(selectedDate) : [];
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col min-h-max">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Booking Calendar</h1>
-                <div className="flex items-center gap-4">
-                    <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors">&larr;</button>
-                    <h2 className="text-lg font-semibold text-gray-700 w-36 text-center">{monthNames[month]} {year}</h2>
-                    <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition-colors">&rarr;</button>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-6 flex flex-col min-h-max">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-center md:text-left">Booking Calendar</h1>
+                <div className="flex items-center gap-2 sm:gap-4 justify-center md:justify-start">
+                    <button onClick={prevMonth} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center text-gray-600">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <h2 className="text-sm sm:text-lg font-semibold text-gray-700 w-28 sm:w-36 text-center whitespace-nowrap">{monthNames[month]} {year}</h2>
+                    <button onClick={nextMonth} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center text-gray-600">
+                        <ChevronRight size={20} />
+                    </button>
                 </div>
             </div>
 
-            <div className="flex gap-4 mb-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-4 h-4 rounded-full bg-red-100 border border-red-200"></div> Booked (Unavailable)
+            <div className="flex gap-4 mb-4">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-red-500/20 border border-red-300"></div> Booked (Unavailable)
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-4 h-4 rounded-full bg-gray-50 border border-gray-200"></div> Available
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gray-50 border border-gray-200"></div> Available
                 </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl border border-gray-200">
+            <div 
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl border border-gray-200 select-none overflow-hidden touch-pan-y"
+            >
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-                    <div key={day} className="bg-gray-50 py-3 text-center text-sm font-semibold text-gray-500">
+                    <div key={day} className="bg-gray-50 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-500">
                         {day}
                     </div>
                 ))}
                 
-                {days.map((day, index) => {
-                    if (day === null) {
-                        return <div key={`empty-${index}`} className="bg-white min-h-[100px]"></div>;
-                    }
-
-                    const dayBookings = getBookingsForDate(day);
+                {days.map((dayObj, index) => {
+                    const { day, monthOffset, dateString } = dayObj;
+                    const dayBookings = getBookingsForDateString(dateString);
                     const isBooked = dayBookings.length > 0;
-
-                    const dateString = getDateString(day);
 
                     return (
                         <div 
-                            key={`day-${day}`} 
+                            key={`${monthOffset}-${day}-${index}`} 
                             onClick={() => setSelectedDate(dateString)}
-                            className={`min-h-[100px] p-2 bg-white border-t border-gray-100 transition-colors cursor-pointer ${
-                                isBooked ? 'bg-red-50/50 hover:bg-red-50' : 'hover:bg-blue-50/30'
-                            }`}
+                            className={`min-h-[38px] sm:min-h-[75px] md:min-h-[90px] p-1 sm:p-2 border-t border-gray-100 transition-colors cursor-pointer flex flex-col justify-between ${
+                                isBooked ? 'bg-red-500/20 hover:bg-red-500/30' : 'bg-white hover:bg-blue-50/30'
+                            } ${monthOffset !== 0 ? 'opacity-30' : ''}`}
                         >
                             <div className="flex justify-between items-start">
-                                <span className={`font-medium text-sm ${isBooked ? 'text-red-700' : 'text-gray-700'}`}>
+                                <span className={`font-medium text-xs sm:text-sm ${
+                                    monthOffset !== 0 ? 'text-gray-400' : isBooked ? 'text-red-800 font-bold' : 'text-gray-700'
+                                }`}>
                                     {day}
                                 </span>
                             </div>
                             
-                            <div className="mt-2 space-y-1">
+                            <div className="mt-1 space-y-1 hidden md:block">
                                 {dayBookings.map((b, i) => (
-                                    <div key={i} className="text-[10px] px-1.5 py-1 bg-red-100 text-red-700 rounded truncate" title={`${(b.venueId as any)?.name} booked by ${(b.userId as any)?.name}`}>
+                                    <div key={i} className="text-[10px] px-1.5 py-1 bg-red-500/30 text-red-950 font-medium rounded truncate" title={`${(b.venueId as any)?.name} booked by ${(b.userId as any)?.name}`}>
                                         {(b.venueId as any)?.name}
                                     </div>
                                 ))}

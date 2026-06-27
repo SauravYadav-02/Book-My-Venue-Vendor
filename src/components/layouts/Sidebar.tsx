@@ -328,15 +328,7 @@ const Sidebar = ({ open: propsOpen, setOpen: propsSetOpen }: SidebarProps) => {
                 {sidebarContent(false)}
             </aside>
 
-            {/* ── Floating Mobile menu trigger button on bottom-right ── */}
-            <button
-                onClick={() => setOpen(true)}
-                className="md:hidden fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-brand-primary text-white flex items-center justify-center shadow-lg shadow-brand-primary/30 hover:bg-brand-light hover:scale-105 active:scale-95 transition-all duration-200 border-none cursor-pointer"
-                aria-label="Open menu"
-                id="mobile-menu-trigger"
-            >
-                <Menu size={24} className="text-white" strokeWidth={2.5} />
-            </button>
+
 
             {/* ══ LOGOUT CONFIRMATION MODAL ══════════════════════════════════ */}
             <AnimatePresence>

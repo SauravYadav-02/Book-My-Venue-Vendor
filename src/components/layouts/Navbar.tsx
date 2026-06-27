@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVendor } from "../../context/VendorContext";
 
@@ -7,7 +7,7 @@ interface NavbarProps {
     onMenuClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = () => {
+const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     const [showProfileInfo, setShowProfileInfo] = useState(false);
     const { vendor, loading } = useVendor();
 
@@ -18,7 +18,16 @@ const Navbar: React.FC<NavbarProps> = () => {
         <header className="w-full bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 xl:px-8 h-[60px] flex items-center justify-between sticky top-0 z-40">
 
             {/* ── Left: Search & Title (Mobile) ───────────────────────── */}
-            <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                {/* Mobile Menu Trigger */}
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden p-1.5 -ml-1 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                    aria-label="Open menu"
+                >
+                    <Menu size={22} strokeWidth={2.2} />
+                </button>
+
                 {/* Mobile Logo - shown on mobile, hidden on tablet and larger */}
                 <img 
                     src="/logo.png" 
@@ -28,11 +37,6 @@ const Navbar: React.FC<NavbarProps> = () => {
 
                 <h1 className="font-semibold text-gray-800 tracking-tight text-lg md:text-xl hidden md:block">
                     Vendor Dashboard
-                </h1>
-
-                {/* Mobile Title - hides when searching */}
-                <h1 className="font-semibold text-gray-800 tracking-tight text-lg md:hidden">
-                    Dashboard
                 </h1>
             </div>
 
